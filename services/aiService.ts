@@ -17,6 +17,9 @@ const INITIAL_GREETING: ChatMessage = {
 
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
+// Parametrización del usuario
+let currentUserName = 'Carlos';
+
 interface ContentPart {
     text: string;
 }
@@ -26,7 +29,27 @@ interface Content {
     parts: ContentPart[];
 }
 
-const SYSTEM_INSTRUCTION_TEXT = 'Eres HealthAI, asistente de "Usuario Logueado". Responde dudas de salud general (ej. dolor de cabeza, fiebre, consejos de bienestar) con empatía. Si el usuario menciona algo que requiera un escaneo visual, usa las etiquetas [ACTION:skin], [ACTION:ocular], [ACTION:dental], [ACTION:nails], [ACTION:posture], [ACTION:wound]. No eres médico, así que añade siempre un aviso legal breve.';
+// System Prompt Dinámico y Mejorado para Triaje
+const getSystemPrompt = (userName: string) => `
+Eres HealthAI, asistente médico personal de ${userName}.
+Tu misión es orientar al usuario con empatía y precisión.
+
+Reglas de Comportamiento:
+1.  **Emergencias**: Si el usuario menciona dolor de pecho severo, dificultad para respirar, asfixia o pérdida de conciencia, INDICA INMEDIATAMENTE LLAMAR A URGENCIAS.
+2.  **Triaje General**: Para síntomas comunes (dolor de cabeza, fiebre, cansancio), ofrece consejos breves de bienestar (hidratación, reposo, evitar pantallas).
+3.  **No eres médico**: Incluye siempre al final un aviso breve de que no sustituyes la atención profesional.
+4.  **Escaneos Visuales**: Solo si el síntoma es claramente VISUAL (piel, ojos rojos, heridas, dientes), sugiere un escaneo.
+
+Etiquetas de Acción (Úsalas solo si aplica un escaneo visual):
+- [ACTION:skin] -> Dermatología
+- [ACTION:ocular] -> Ojos
+- [ACTION:dental] -> Dental
+- [ACTION:nails] -> Uñas
+- [ACTION:posture] -> Postura
+- [ACTION:wound] -> Heridas
+
+Responde de forma concisa.
+`;
 
 let chatHistory: Content[] = [];
 
@@ -37,32 +60,37 @@ export const AIService = {
         chatHistory = [];
     },
 
+    setUserName: (name: string) => {
+        currentUserName = name;
+    },
+
     sendMessage: async (text: string): Promise<ChatMessage> => {
         if (!API_KEY) return AIService.fallbackLogic(text);
 
         const userMsg: Content = { role: 'user', parts: [{ text: text.trim() }] };
-        const historyToSend = [...chatHistory, userMsg].filter(m => m.parts[0].text.trim().length > 0);
+
+        // Optimización de Historial: Últimos 10 mensajes para evitar sobrecarga
+        const recentHistory = chatHistory.slice(-10);
+        const historyToSend = [...recentHistory, userMsg].filter(m => m.parts[0].text.trim().length > 0);
 
         let aiResponseText = '';
 
         try {
-            // URL Exacta que funciona en AnalysisService
             const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + API_KEY;
 
             const payload = {
                 contents: [
-                    // Inyectamos System Prompt como historial falso (Técnica probada)
+                    // Inyección de System Prompt como historial inicial (Técnica Estable)
                     {
                         role: "user",
-                        parts: [{ text: "SYSTEM INSTRUCTIONS: " + SYSTEM_INSTRUCTION_TEXT }]
+                        parts: [{ text: "SYSTEM INSTRUCTIONS: " + getSystemPrompt(currentUserName) }]
                     },
                     {
                         role: "model",
-                        parts: [{ text: "Entendido. Actuaré como HealthAI siguiendo tus instrucciones estrictamente." }]
+                        parts: [{ text: `Entendido. Soy HealthAI y ayudaré a ${currentUserName} siguiendo tus instrucciones.` }]
                     },
                     ...historyToSend
                 ],
-                // Ajustes de seguridad mínimos para permitir conversaciones médicas
                 safetySettings: [
                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
                     { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
@@ -71,7 +99,7 @@ export const AIService = {
                 ]
             };
 
-            console.log('[HealthAI] Conectando a Gemini (Flash Latest)...');
+            console.log('[HealthAI] Conectando a Gemini...');
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -81,9 +109,9 @@ export const AIService = {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                // Si falla Flash, intentamos Pro
                 console.warn('[HealthAI] Fallo Flash, intentando Pro. Error:', errorText);
 
+                // Fallback a Gemini Pro
                 const urlPro = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY;
                 const responsePro = await fetch(urlPro, {
                     method: 'POST',
@@ -105,9 +133,10 @@ export const AIService = {
 
             if (!aiResponseText) throw new Error('Respuesta vacía');
 
-            // Limpiar respuesta de markdown si es necesario
+            // Limpieza de Markdown (bloques de código)
             aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
 
+            // Actualizar historial persistente
             chatHistory.push(userMsg);
             chatHistory.push({ role: 'model', parts: [{ text: aiResponseText }] });
 
@@ -130,11 +159,12 @@ export const AIService = {
     parseResponse: (text: string) => {
         let cleanText = text;
         let relatedModule: ScanType | undefined;
-        const actionMatch = text.match(/\[ACTION:(\w+)\]/);
+        // Regex mejorada: insensible a mayúsculas y espacios
+        const actionMatch = text.match(/\[ACTION:\s*(\w+)\s*\]/i);
 
         if (actionMatch) {
-            const actionType = actionMatch[1];
-            cleanText = text.replace(/\[ACTION:\w+\]/, '').trim();
+            const actionType = actionMatch[1].toLowerCase();
+            cleanText = text.replace(/\[ACTION:\s*\w+\s*\]/i, '').trim();
             if (['skin', 'ocular', 'dental', 'nails', 'posture', 'wound'].includes(actionType)) {
                 relatedModule = actionType as ScanType;
             }
@@ -148,25 +178,25 @@ export const AIService = {
         const lowerText = text.toLowerCase();
 
         if (lowerText.includes('piel') || lowerText.includes('mancha') || lowerText.includes('lunar')) {
-            responseText = 'Para analizar manchas, lunares o irritaciones en la piel, te recomiendo usar el escáner Dermatológico.';
+            responseText = 'Para analizar problemas de piel, te recomiendo el escáner Dermatológico.';
             relatedModule = 'skin';
         } else if (lowerText.includes('ojo') || lowerText.includes('visión') || lowerText.includes('rojo')) {
-            responseText = 'Para problemas oculares visibles, usa nuestro escáner Ocular.';
+            responseText = 'Para problemas oculares, usa el escáner Ocular.';
             relatedModule = 'ocular';
-        } else if (lowerText.includes('diente') || lowerText.includes('boca') || lowerText.includes('encía')) {
-            responseText = 'Para salud bucal, usa el escáner Dental.';
+        } else if (lowerText.includes('diente') || lowerText.includes('boca')) {
+            responseText = 'Para salud dental, usa el escáner Dental.';
             relatedModule = 'dental';
         } else if (lowerText.includes('uña') || lowerText.includes('hongo')) {
-            responseText = 'Para analizar uñas, usa el escáner de Uñas.';
+            responseText = 'Para uñas, usa el escáner de Uñas.';
             relatedModule = 'nails';
-        } else if (lowerText.includes('postura') || lowerText.includes('espalda') || lowerText.includes('dolor')) {
-            responseText = 'El módulo de Postura te ayuda a evaluar tu alineación.';
+        } else if (lowerText.includes('postura') || lowerText.includes('espalda')) {
+            responseText = 'Evalúa tu postura con nuestro escáner dedicado.';
             relatedModule = 'posture';
         } else if (lowerText.includes('herida') || lowerText.includes('corte')) {
             responseText = 'Usa el módulo de Heridas para seguimiento.';
             relatedModule = 'wound';
         } else {
-            responseText = 'Entiendo. Como estoy en modo offline, te sugiero descansar e hidratarte. Si tienes un problema visual, elige un escáner del menú.';
+            responseText = 'Entiendo. En modo offline te sugiero consultar a un médico si tienes síntomas persistentes. Sigo aquí para orientarte.';
         }
 
         return {
