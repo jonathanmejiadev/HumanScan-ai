@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import ModuleCard from '@/components/shared/ModuleCard';
+import { useRouter } from 'expo-router';
 
 interface QuickScanGridProps {
-    showAll?: boolean;
     onModulePress?: (scanType: ScanType) => void;
     onHelpPress?: (scanType: ScanType) => void;
 }
 
 export default function QuickScanGrid({
-    showAll: initialShowAll = false,
     onModulePress,
     onHelpPress,
 }: QuickScanGridProps) {
-    const [showAll, setShowAll] = useState(initialShowAll);
-
+    const router = useRouter();
     const modules: ScanType[] = ['skin', 'ocular', 'dental', 'posture', 'nails', 'wound'];
-    const displayedModules = showAll ? modules : modules.slice(0, 2);
+
+    // Only show first 2 modules on Home
+    const displayedModules = modules.slice(0, 2);
 
     const handleModulePress = (scanType: ScanType) => {
         if (onModulePress) {
@@ -25,20 +25,16 @@ export default function QuickScanGrid({
         }
     };
 
-    const handleHelpPress = (scanType: ScanType) => {
-        if (onHelpPress) {
-            onHelpPress(scanType);
-        }
+    const handleSeeAll = () => {
+        router.push('/categories');
     };
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Escaneos Rápidos</Text>
-                <TouchableOpacity onPress={() => setShowAll(!showAll)}>
-                    <Text style={styles.seeAllButton}>
-                        {showAll ? 'Ver menos' : 'Ver todo'}
-                    </Text>
+                <TouchableOpacity onPress={handleSeeAll}>
+                    <Text style={styles.seeAllButton}>Ver todo</Text>
                 </TouchableOpacity>
             </View>
 
@@ -48,7 +44,6 @@ export default function QuickScanGrid({
                         <ModuleCard
                             scanType={scanType}
                             onPress={() => handleModulePress(scanType)}
-                            onHelpPress={() => handleHelpPress(scanType)}
                         />
                     </View>
                 ))}
@@ -79,12 +74,9 @@ const styles = StyleSheet.create({
         color: '#3B82F6',
     },
     grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        gap: 0,
     },
     gridItem: {
-        width: '48%',
-        marginBottom: 16,
+        width: '100%',
     },
 });
