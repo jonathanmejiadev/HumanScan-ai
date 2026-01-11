@@ -29,7 +29,7 @@ interface Content {
     parts: ContentPart[];
 }
 
-// System Prompt Dinámico y Mejorado para Triaje
+// System Prompt Dinámico y Mejorado para Triaje (PRESERVADO INTACTO CON LÓGICA DINÁMICA)
 const getSystemPrompt = (userName: string) => `
 ROL: Eres HealthAI, un asistente de salud virtual inteligente y empático para ${userName}.
 IDIOMA: Responde SIEMPRE en Español.
@@ -79,7 +79,7 @@ export const AIService = {
 
         const userMsg: Content = { role: 'user', parts: [{ text: text.trim() }] };
 
-        // Optimización de Historial: Últimos 10 mensajes para evitar sobrecarga
+        // Optimización de Historial: Slice últimos 10
         const recentHistory = chatHistory.slice(-10);
         const historyToSend = [...recentHistory, userMsg].filter(m => m.parts[0].text.trim().length > 0);
 
@@ -90,14 +90,14 @@ export const AIService = {
 
             const payload = {
                 contents: [
-                    // Inyección de System Prompt como historial inicial (Técnica Estable)
+                    // Inyección de System Prompt al INICIO del historial
                     {
                         role: "user",
                         parts: [{ text: "SYSTEM INSTRUCTIONS: " + getSystemPrompt(currentUserName) }]
                     },
                     {
                         role: "model",
-                        parts: [{ text: `Entendido. Soy HealthAI y ayudaré a ${currentUserName} siguiendo tus instrucciones.` }]
+                        parts: [{ text: `Entendido. Soy HealthAI y ayudaré a ${currentUserName} siguiendo tus protocolos médicos.` }]
                     },
                     ...historyToSend
                 ],
@@ -109,8 +109,6 @@ export const AIService = {
                 ]
             };
 
-            console.log('[HealthAI] Conectando a Gemini...');
-
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -118,24 +116,18 @@ export const AIService = {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.warn('[HealthAI] Fallo Flash, intentando Pro. Error:', errorText);
-
-                // Fallback a Gemini Pro
+                // Flash falló, probar Pro
                 const urlPro = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY;
-                const responsePro = await fetch(urlPro, {
+                const responsePro = await fetch(urlPro, { // Mismo payload
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                 });
 
-                if (!responsePro.ok) {
-                    throw new Error("API Error Pro: " + await responsePro.text());
-                }
+                if (!responsePro.ok) throw new Error("API Pro Error: " + await responsePro.text());
 
                 const dataPro = await responsePro.json();
                 aiResponseText = dataPro.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
             } else {
                 const data = await response.json();
                 aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -143,10 +135,9 @@ export const AIService = {
 
             if (!aiResponseText) throw new Error('Respuesta vacía');
 
-            // Limpieza de Markdown (bloques de código)
+            // Limpieza de Markdown
             aiResponseText = aiResponseText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-            // Actualizar historial persistente
             chatHistory.push(userMsg);
             chatHistory.push({ role: 'model', parts: [{ text: aiResponseText }] });
 
@@ -169,12 +160,15 @@ export const AIService = {
     parseResponse: (text: string) => {
         let cleanText = text;
         let relatedModule: ScanType | undefined;
-        // Regex mejorada: insensible a mayúsculas y espacios
-        const actionMatch = text.match(/\[ACTION:\s*(\w+)\s*\]/i);
+        // Regex robusta: espacios opcionales, insensible mayúsculas
+        const actionRegex = /\[ACTION:\s*(\w+)\s*\]/i;
+        const actionMatch = text.match(actionRegex);
 
         if (actionMatch) {
             const actionType = actionMatch[1].toLowerCase();
-            cleanText = text.replace(/\[ACTION:\s*\w+\s*\]/i, '').trim();
+            // Eliminar etiqueta del texto visible
+            cleanText = text.replace(actionRegex, '').trim();
+
             if (['skin', 'ocular', 'dental', 'nails', 'posture', 'wound'].includes(actionType)) {
                 relatedModule = actionType as ScanType;
             }
