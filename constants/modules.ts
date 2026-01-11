@@ -100,7 +100,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'user',
         color: '#F1F5F9',
         accentColor: '#475569',
-        gradientColors: ['#F1F5F9', '#FFFFFF'], // Suave Gris -> Blanco
+        gradientColors: ['#E2E8F0', '#FFFFFF'], // Gris Slate 200 -> Blanco
         overlayType: 'rectangle',
         badges: ['Densidad', 'Folículo', 'Recesión'],
         specialist: 'Dermatólogo',
@@ -113,7 +113,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'smile',
         color: '#FFF5F5',
         accentColor: '#EF4444',
-        gradientColors: ['#FEE2E2', '#FFFFFF'], // Suave Rojo -> Blanco
+        gradientColors: ['#FCE7F3', '#FFFFFF'], // Rosa 100 -> Blanco (Diferente a Heridas)
         overlayType: 'oval',
         badges: ['Amígdalas', 'Placas', 'Faringe'],
         specialist: 'Médico General',
@@ -126,7 +126,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'activity',
         color: '#EFF6FF',
         accentColor: '#1E3A8A',
-        gradientColors: ['#EFF6FF', '#FFFFFF'], // Suave Azul -> Blanco
+        gradientColors: ['#E0E7FF', '#FFFFFF'], // Indigo 100 -> Blanco
         overlayType: 'rectangle',
         badges: ['Vascular', 'Retención', 'Pigmento'],
         specialist: 'Traumatólogo',
@@ -139,7 +139,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'baby',
         color: '#FEFCE8',
         accentColor: '#EAB308',
-        gradientColors: ['#FEFCE8', '#FFFFFF'], // Suave Amarillo -> Blanco
+        gradientColors: ['#FEF9C3', '#FFFFFF'], // Amarillo 100 -> Blanco
         overlayType: 'rectangle',
         badges: ['Exantema', 'Brote', 'Infantil'],
         specialist: 'Pediatra',
@@ -152,7 +152,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'shield-alert',
         color: '#FAF5FF',
         accentColor: '#581C87',
-        gradientColors: ['#F5F3FF', '#FFFFFF'], // Suave Púrpura -> Blanco
+        gradientColors: ['#EDE9FE', '#FFFFFF'], // Violeta 100 -> Blanco
         overlayType: 'circle',
         badges: ['Lesión', 'Mucosa', 'Alerta'],
         specialist: 'Médico General',
@@ -165,7 +165,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'bug',
         color: '#FFF7ED',
         accentColor: '#EA580C',
-        gradientColors: ['#FFF7ED', '#FFFFFF'], // Suave Naranja -> Blanco
+        gradientColors: ['#FFEDD5', '#FFFFFF'], // Naranja 100 -> Blanco
         overlayType: 'rectangle',
         badges: ['Insecto', 'Eritema', 'Reacción'],
         specialist: 'Médico General',
