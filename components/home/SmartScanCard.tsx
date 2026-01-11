@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Camera, ChevronRight, Sparkles } from 'lucide-react-native';
+import { ChevronRight, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface SmartScanCardProps {
@@ -18,10 +18,6 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
             >
                 {/* Main Content Area */}
                 <View style={styles.mainContent}>
-                    <View style={styles.iconWrapper}>
-                        <Camera size={44} color="#FFFFFF" strokeWidth={2} />
-                    </View>
-
                     <View style={styles.textContent}>
                         <Text style={styles.title}>Análisis Universal IA</Text>
                         <Text style={styles.description}>
@@ -29,6 +25,9 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
                         </Text>
                     </View>
                 </View>
+
+                {/* Vertical Spacer for better separation */}
+                <View style={styles.spacer} />
 
                 {/* Bottom Action Area */}
                 <View style={styles.footer}>
@@ -66,15 +65,11 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         zIndex: 2,
     },
-    iconWrapper: {
-        width: 50,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
     textContent: {
         flex: 1,
+    },
+    spacer: {
+        height: 20, // Increased spacing
     },
     title: {
         fontSize: 22,
