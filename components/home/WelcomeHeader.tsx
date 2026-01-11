@@ -5,7 +5,7 @@ interface WelcomeHeaderProps {
     userName?: string;
 }
 
-export default function WelcomeHeader({ userName = 'Carlos' }: WelcomeHeaderProps) {
+export default function WelcomeHeader({ userName = 'Jonathan' }: WelcomeHeaderProps) {
     return (
         <View style={styles.container}>
             <View style={styles.textContainer}>

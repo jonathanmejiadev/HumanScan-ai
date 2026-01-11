@@ -61,7 +61,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <WelcomeHeader userName="Carlos" />
+        <WelcomeHeader userName="Jonathan" />
 
         <SmartScanCard onPress={handleSmartScan} />
 

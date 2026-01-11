@@ -18,7 +18,7 @@ const INITIAL_GREETING: ChatMessage = {
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 
 // Parametrización del usuario
-let currentUserName = 'Carlos';
+let currentUserName = 'Jonathan';
 
 interface ContentPart {
     text: string;
