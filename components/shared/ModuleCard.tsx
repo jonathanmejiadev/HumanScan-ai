@@ -25,7 +25,6 @@ export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCar
     const module = MODULES[scanType];
     const IconComponent = iconMap[module.icon] || Camera;
 
-    // Default gradient if not specified (though it is now required in types)
     const gradientColors = module.gradientColors || ['#FFFFFF', '#FFFFFF'];
 
     return (
@@ -37,23 +36,22 @@ export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCar
             <LinearGradient
                 colors={gradientColors}
                 start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }} // Changed to diagonal for better grid look
                 style={styles.gradientContainer}
             >
-                {/* Left: Icon */}
+                {/* Top: Icon centered */}
                 <View style={[styles.iconContainer, { backgroundColor: module.accentColor }]}>
-                    <IconComponent size={24} color="#FFFFFF" />
+                    <IconComponent size={28} color="#FFFFFF" />
                 </View>
 
-                {/* Center: Content */}
+                {/* Bottom: Title and Tags */}
                 <View style={styles.contentContainer}>
                     <Text style={styles.title}>{module.name}</Text>
-                    <Text style={styles.description} numberOfLines={2}>
-                        {module.description}
-                    </Text>
+
+                    {/* Description removed for compact grid view as requested */}
 
                     <View style={styles.badgesContainer}>
-                        {module.badges.map((badge, index) => (
+                        {module.badges.slice(0, 2).map((badge, index) => (
                             <View key={index} style={styles.badge}>
                                 <Text style={styles.badgeText}>
                                     {badge}
@@ -62,11 +60,6 @@ export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCar
                         ))}
                     </View>
                 </View>
-
-                {/* Right: Chevron */}
-                <View style={styles.arrowContainer}>
-                    <ChevronRight size={24} color="#9CA3AF" />
-                </View>
             </LinearGradient>
         </TouchableOpacity>
     );
@@ -74,68 +67,67 @@ export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCar
 
 const styles = StyleSheet.create({
     touchableWrapper: {
-        marginBottom: 16,
+        flex: 1,
         borderRadius: 24,
-        // Drop Shadow applied to the wrapper
+        // Drop Shadow
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 3,
-        backgroundColor: 'transparent', // Important for shadow on iOS sometimes or just logic
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        elevation: 4,
+        backgroundColor: '#FFFFFF',
     },
     gradientContainer: {
-        flexDirection: 'row',
-        padding: 16,
+        flex: 1,
+        padding: 20,
         alignItems: 'center',
+        justifyContent: 'center',
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: '#F3F4F6', // Subtle border
+        borderColor: '#F3F4F6',
+        minHeight: 160,
     },
     iconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 16,
+        width: 60,
+        height: 60,
+        borderRadius: 18,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     contentContainer: {
-        flex: 1,
-        marginRight: 12,
+        alignItems: 'center',
     },
     title: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: 'bold',
         color: '#111827',
-        marginBottom: 4,
-    },
-    description: {
-        fontSize: 13,
-        color: '#6B7280',
-        lineHeight: 18,
-        marginBottom: 8,
+        textAlign: 'center',
+        marginBottom: 10,
     },
     badgesContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'center',
         gap: 6,
     },
     badge: {
-        backgroundColor: 'rgba(255, 255, 255, 0.6)', // Semi-transparent white for badges on gradient
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         paddingHorizontal: 8,
         paddingVertical: 3,
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.8)',
+        borderColor: 'rgba(255, 255, 255, 0.9)',
     },
     badgeText: {
-        fontSize: 10,
-        fontWeight: '600',
+        fontSize: 9,
+        fontWeight: '700',
         color: '#4B5563',
-    },
-    arrowContainer: {
-        justifyContent: 'center',
-        alignItems: 'center',
+        textTransform: 'uppercase',
     },
 });

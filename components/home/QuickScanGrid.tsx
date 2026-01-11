@@ -79,9 +79,12 @@ const styles = StyleSheet.create({
         color: '#3B82F6',
     },
     grid: {
-        gap: 0,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
     },
     gridItem: {
-        width: '100%',
+        width: '48%',
+        marginBottom: 16,
     },
 });
