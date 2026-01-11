@@ -92,6 +92,84 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         badges: ['Evolución', 'Cierre', 'Infección'],
         specialist: 'Médico General',
         instructions: 'Centra la herida y alinea con la foto anterior si existe'
+    },
+    capillary: {
+        id: 'capillary',
+        name: 'Capilar',
+        description: 'Análisis de densidad folicular, salud del cuero cabelludo y retroceso de la línea capilar.',
+        icon: 'user',
+        color: '#F1F5F9',
+        accentColor: '#475569',
+        gradientColors: ['#475569', '#F1F5F9'],
+        overlayType: 'rectangle',
+        badges: ['Densidad', 'Folículo', 'Recesión'],
+        specialist: 'Dermatólogo',
+        instructions: 'Separa el cabello para exponer el cuero cabelludo y mantén una buena iluminación'
+    },
+    throat: {
+        id: 'throat',
+        name: 'Garganta',
+        description: 'Evaluación de amígdalas, úvula y faringe para detectar placas, irritación o inflamación.',
+        icon: 'smile',
+        color: '#FFF5F5',
+        accentColor: '#EF4444',
+        gradientColors: ['#FECACA', '#FFFFFF'],
+        overlayType: 'oval',
+        badges: ['Amígdalas', 'Placas', 'Faringe'],
+        specialist: 'Médico General',
+        instructions: 'Abre bien la boca y saca la lengua, asegúrate de iluminar bien la zona posterior'
+    },
+    veins: {
+        id: 'veins',
+        name: 'Varices',
+        description: 'Detección de arañitas vasculares y cambios de coloración por insuficiencia venosa.',
+        icon: 'activity',
+        color: '#EFF6FF',
+        accentColor: '#1E3A8A',
+        gradientColors: ['#1E3A8A', '#BFDBFE'],
+        overlayType: 'rectangle',
+        badges: ['Vascular', 'Retención', 'Pigmento'],
+        specialist: 'Traumatólogo',
+        instructions: 'Centra la zona de las piernas afectada y procura estar de pie para mayor visibilidad'
+    },
+    pediatrics: {
+        id: 'pediatrics',
+        name: 'Pediatría',
+        description: 'Detección de exantemas infantiles, varicela y manchas relacionadas con cuadros febriles.',
+        icon: 'baby',
+        color: '#FEFCE8',
+        accentColor: '#EAB308',
+        gradientColors: ['#FEF08A', '#FFFFFF'],
+        overlayType: 'rectangle',
+        badges: ['Exantema', 'Brote', 'Infantil'],
+        specialist: 'Pediatra',
+        instructions: 'Enfoca la zona del brote o sarpullido con luz natural si es posible'
+    },
+    intimate: {
+        id: 'intimate',
+        name: 'Salud Íntima',
+        description: 'Identificación de verrugas, llagas o protuberancias inusuales para triaje de salud sexual.',
+        icon: 'shield-alert',
+        color: '#FAF5FF',
+        accentColor: '#581C87',
+        gradientColors: ['#581C87', '#1F2937'],
+        overlayType: 'circle',
+        badges: ['Lesión', 'Mucosa', 'Alerta'],
+        specialist: 'Médico General',
+        instructions: 'Busca un lugar privado con buena luz y centra la cámara en la zona de interés'
+    },
+    bites: {
+        id: 'bites',
+        name: 'Picaduras',
+        description: 'Diferenciación entre picaduras de insectos, arácnidos o reacciones alérgicas localizadas.',
+        icon: 'bug',
+        color: '#FFF7ED',
+        accentColor: '#EA580C',
+        gradientColors: ['#EA580C', '#FFFFFF'],
+        overlayType: 'rectangle',
+        badges: ['Insecto', 'Eritema', 'Reacción'],
+        specialist: 'Médico General',
+        instructions: 'Centra la picadura y trata de captar los bordes de la reacción inflamatoria'
     }
 };
 

@@ -19,7 +19,10 @@ export default function AllCategoriesScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
 
-    const modules: ScanType[] = ['skin', 'ocular', 'dental', 'posture', 'nails', 'wound'];
+    const modules: ScanType[] = [
+        'skin', 'ocular', 'dental', 'posture', 'nails', 'wound',
+        'capillary', 'throat', 'veins', 'pediatrics', 'intimate', 'bites'
+    ];
 
     const handleModulePress = (scanType: ScanType) => {
         router.push({ pathname: '/scan', params: { type: scanType } });

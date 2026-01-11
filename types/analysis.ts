@@ -1,8 +1,8 @@
 export type RiskLevel = 'Bajo' | 'Medio' | 'Alto' | 'Emergencia';
 
-export type ScanType = 'skin' | 'ocular' | 'dental' | 'posture' | 'nails' | 'wound';
+export type ScanType = 'skin' | 'ocular' | 'dental' | 'posture' | 'nails' | 'wound' | 'capillary' | 'throat' | 'veins' | 'pediatrics' | 'intimate' | 'bites';
 
-export type SpecialistType = 'Dermatólogo' | 'Oftalmólogo' | 'Médico General' | 'Odontólogo' | 'Fisioterapeuta' | 'Traumatólogo' | 'Cirujano';
+export type SpecialistType = 'Dermatólogo' | 'Oftalmólogo' | 'Médico General' | 'Odontólogo' | 'Fisioterapeuta' | 'Traumatólogo' | 'Cirujano' | 'Pediatra' | 'Urólogo' | 'Ginecólogo';
 
 export type OverlayType = 'rectangle' | 'circle' | 'oval' | 'grid' | 'comparison';
 
