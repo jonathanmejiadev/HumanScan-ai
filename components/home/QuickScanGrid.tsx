@@ -32,7 +32,7 @@ export default function QuickScanGrid({
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Escaneos Rápidos</Text>
+                <Text style={styles.title}>Especialidades</Text>
                 <TouchableOpacity onPress={handleSeeAll}>
                     <Text style={styles.seeAllButton}>Ver todo</Text>
                 </TouchableOpacity>

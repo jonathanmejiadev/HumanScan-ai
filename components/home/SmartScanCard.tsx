@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Scan, ChevronRight, Sparkles } from 'lucide-react-native';
+import { Camera, ChevronRight, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface SmartScanCardProps {
@@ -19,7 +19,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
                 {/* Main Content Area */}
                 <View style={styles.mainContent}>
                     <View style={styles.iconContainer}>
-                        <Scan size={32} color="#FFFFFF" strokeWidth={2.5} />
+                        <Camera size={32} color="#FFFFFF" strokeWidth={2.5} />
                         {/* Glow Effect simulation */}
                         <View style={styles.iconGlow} />
                     </View>
