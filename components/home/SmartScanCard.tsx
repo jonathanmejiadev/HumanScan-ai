@@ -39,7 +39,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
                         onPress={onPress}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.startButtonText}>Iniciar</Text>
+                        <Text style={styles.startButtonText}>Escanear ahora</Text>
                         <ChevronRight size={16} color="#FFFFFF" />
                     </TouchableOpacity>
                 </View>
