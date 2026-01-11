@@ -2,15 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
-import { Camera } from 'lucide-react-native';
+import { Camera, HelpCircle, Eye } from 'lucide-react-native';
 
 interface ModuleCardProps {
     scanType: ScanType;
     onPress: () => void;
+    onHelpPress?: () => void;
 }
 
-export default function ModuleCard({ scanType, onPress }: ModuleCardProps) {
+export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCardProps) {
     const module = MODULES[scanType];
+    const isSpecialized = scanType === 'skin' || scanType === 'ocular';
+
+    // Use Eye icon for ocular, Camera for others
+    const IconComponent = scanType === 'ocular' ? Eye : Camera;
 
     return (
         <TouchableOpacity
@@ -18,8 +23,22 @@ export default function ModuleCard({ scanType, onPress }: ModuleCardProps) {
             onPress={onPress}
             activeOpacity={0.7}
         >
-            <View style={[styles.iconContainer, { backgroundColor: module.accentColor }]}>
-                <Camera size={24} color="#FFFFFF" />
+            <View style={styles.header}>
+                <View style={[styles.iconContainer, { backgroundColor: module.accentColor }]}>
+                    <IconComponent size={24} color="#FFFFFF" />
+                </View>
+                {isSpecialized && onHelpPress && (
+                    <TouchableOpacity
+                        style={styles.helpButton}
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            onHelpPress();
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <HelpCircle size={20} color={module.accentColor} />
+                    </TouchableOpacity>
+                )}
             </View>
 
             <Text style={styles.title}>{module.name}</Text>
@@ -44,6 +63,17 @@ const styles = StyleSheet.create({
         padding: 20,
         marginBottom: 16,
         minHeight: 160,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 12,
     },
     iconContainer: {
         width: 48,
@@ -51,7 +81,19 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 12,
+    },
+    helpButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     title: {
         fontSize: 18,
@@ -61,9 +103,10 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 13,
-        color: '#6B7280',
+        color: '#374151',
         lineHeight: 18,
         marginBottom: 12,
+        fontWeight: '600',
     },
     badgesContainer: {
         flexDirection: 'row',

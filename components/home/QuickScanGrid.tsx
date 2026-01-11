@@ -2,24 +2,33 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import ModuleCard from '@/components/shared/ModuleCard';
-import { useRouter } from 'expo-router';
 
 interface QuickScanGridProps {
     showAll?: boolean;
+    onModulePress?: (scanType: ScanType) => void;
+    onHelpPress?: (scanType: ScanType) => void;
 }
 
-export default function QuickScanGrid({ showAll: initialShowAll = false }: QuickScanGridProps) {
+export default function QuickScanGrid({
+    showAll: initialShowAll = false,
+    onModulePress,
+    onHelpPress,
+}: QuickScanGridProps) {
     const [showAll, setShowAll] = useState(initialShowAll);
-    const router = useRouter();
 
     const modules: ScanType[] = ['skin', 'ocular', 'dental', 'posture', 'nails', 'wound'];
     const displayedModules = showAll ? modules : modules.slice(0, 2);
 
     const handleModulePress = (scanType: ScanType) => {
-        router.push({
-            pathname: '/scan',
-            params: { type: scanType }
-        });
+        if (onModulePress) {
+            onModulePress(scanType);
+        }
+    };
+
+    const handleHelpPress = (scanType: ScanType) => {
+        if (onHelpPress) {
+            onHelpPress(scanType);
+        }
     };
 
     return (
@@ -39,6 +48,7 @@ export default function QuickScanGrid({ showAll: initialShowAll = false }: Quick
                         <ModuleCard
                             scanType={scanType}
                             onPress={() => handleModulePress(scanType)}
+                            onHelpPress={() => handleHelpPress(scanType)}
                         />
                     </View>
                 ))}

@@ -17,7 +17,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
     skin: {
         id: 'skin',
         name: 'Dermatológico',
-        description: 'Lunares, manchas o lesiones de la piel',
+        description: 'Chequeo Preventivo: Análisis detallado bajo estándar ABCDE',
         icon: 'camera',
         color: '#E8EAF6',
         accentColor: '#5E6AD2',
@@ -29,7 +29,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
     ocular: {
         id: 'ocular',
         name: 'Ocular',
-        description: 'Conjuntiva, esclerótica o iris',
+        description: 'Protocolos especializados de salud ocular y detección temprana',
         icon: 'eye',
         color: '#E0F2F1',
         accentColor: '#00BFA5',
