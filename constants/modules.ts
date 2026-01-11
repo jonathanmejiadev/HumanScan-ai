@@ -7,6 +7,7 @@ export interface ModuleConfig {
     icon: string;
     color: string;
     accentColor: string;
+    gradientColors: [string, string]; // New prop for gradient background
     overlayType: OverlayType;
     badges: string[];
     specialist: SpecialistType;
@@ -18,9 +19,10 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         id: 'skin',
         name: 'Dermatológico',
         description: 'Evaluación de piel, lunares, manchas y lesiones cutáneas.',
-        icon: 'camera',
+        icon: 'scan',
         color: '#E8EAF6',
         accentColor: '#5E6AD2',
+        gradientColors: ['#F3E8FF', '#FFFFFF'], // Violeta pálido -> Blanco
         overlayType: 'rectangle',
         badges: ['ABCDE', 'Triaje', 'Guía'],
         specialist: 'Dermatólogo',
@@ -33,6 +35,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'eye',
         color: '#E0F2F1',
         accentColor: '#00BFA5',
+        gradientColors: ['#E0F2FE', '#FFFFFF'], // Azul pálido -> Blanco
         overlayType: 'circle',
         badges: ['Conjuntiva', 'Pupila', 'Iris'],
         specialist: 'Oftalmólogo',
@@ -45,6 +48,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'smile',
         color: '#FFF3E0',
         accentColor: '#FF9800',
+        gradientColors: ['#FEF3C7', '#FFFFFF'], // Amarillo/Naranja pálido -> Blanco
         overlayType: 'oval',
         badges: ['Encías', 'Esmalte', 'Placa'],
         specialist: 'Odontólogo',
@@ -57,6 +61,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'user',
         color: '#F3E5F5',
         accentColor: '#9C27B0',
+        gradientColors: ['#FAE8FF', '#FFFFFF'], // Magenta pálido -> Blanco
         overlayType: 'grid',
         badges: ['Simetría', 'Ergonomía', 'Eje'],
         specialist: 'Fisioterapeuta',
@@ -69,6 +74,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'hand',
         color: '#FCE4EC',
         accentColor: '#E91E63',
+        gradientColors: ['#FFE4E6', '#FFFFFF'], // Rosa pálido -> Blanco
         overlayType: 'rectangle',
         badges: ['Lúnula', 'Textura', 'Hongos'],
         specialist: 'Dermatólogo',
@@ -81,6 +87,7 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         icon: 'activity',
         color: '#FFEBEE',
         accentColor: '#F44336',
+        gradientColors: ['#FEE2E2', '#FFFFFF'], // Rojo pálido -> Blanco
         overlayType: 'comparison',
         badges: ['Evolución', 'Cierre', 'Infección'],
         specialist: 'Médico General',
