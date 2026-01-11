@@ -36,3 +36,11 @@ export interface WoundComparison {
   areaChange?: number; // Percentage change in wound area
   healingProgress?: 'improving' | 'stable' | 'worsening';
 }
+
+export interface ClassificationResult {
+  detectedZone: string;
+  confidence: number;
+  recommendedModule: ScanType;
+  summary: string;
+  findings: string[];
+}

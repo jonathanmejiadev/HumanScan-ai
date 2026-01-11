@@ -1,4 +1,4 @@
-import { ScanType } from '@/types/analysis';
+import { ScanType, ClassificationResult } from '@/types/analysis';
 
 export interface ChatMessage {
     id: string;
@@ -21,7 +21,11 @@ const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
 let currentUserName = 'Jonathan';
 
 interface ContentPart {
-    text: string;
+    text?: string;
+    inline_data?: {
+        mime_type: string;
+        data: string;
+    };
 }
 
 interface Content {
@@ -74,6 +78,56 @@ export const AIService = {
         currentUserName = name;
     },
 
+    classifyImage: async (base64Image: string): Promise<ClassificationResult> => {
+        if (!API_KEY) {
+            // Fallback manual si no hay API Key
+            return {
+                detectedZone: 'Piel (Cuerpo)',
+                confidence: 0.85,
+                recommendedModule: 'skin',
+                summary: 'Se ha detectado una zona cutánea para análisis dermatológico.',
+                findings: ['Textura uniforme', 'Coloración normal']
+            };
+        }
+
+        try {
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+
+            const prompt = `Analiza esta imagen médica y determina qué parte del cuerpo o especialidad de la app corresponde.
+            Responde ÚNICAMENTE en formato JSON con esta estructura:
+            {
+              "detectedZone": "Nombre de la zona",
+              "confidence": 0.95,
+              "recommendedModule": "skin" | "ocular" | "dental" | "posture" | "nails" | "wound" | "capillary" | "throat" | "veins" | "pediatrics" | "intimate" | "bites",
+              "summary": "Breve resumen de lo detectado",
+              "findings": ["hallazgo 1", "hallazgo 2"]
+            }`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inline_data: { mime_type: "image/jpeg", data: base64Image } }
+                        ]
+                    }]
+                }),
+            });
+
+            const data = await response.json();
+            const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+            // Limpieza de JSON
+            const jsonStr = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(jsonStr);
+        } catch (error) {
+            console.error('[HealthAI] Error en clasificación:', error);
+            throw error;
+        }
+    },
+
     sendMessage: async (text: string): Promise<ChatMessage> => {
         if (!API_KEY) return AIService.fallbackLogic(text);
 
@@ -81,7 +135,7 @@ export const AIService = {
 
         // Optimización de Historial: Slice últimos 10
         const recentHistory = chatHistory.slice(-10);
-        const historyToSend = [...recentHistory, userMsg].filter(m => m.parts[0].text.trim().length > 0);
+        const historyToSend = [...recentHistory, userMsg].filter(m => m.parts[0].text && m.parts[0].text.trim().length > 0);
 
         let aiResponseText = '';
 

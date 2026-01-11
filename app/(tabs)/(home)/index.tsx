@@ -20,9 +20,9 @@ export default function HomeScreen() {
   const [selectedScanType, setSelectedScanType] = useState<ScanType>('skin');
 
   const handleSmartScan = () => {
-    // Navigate to smart scan with automatic detection
-    console.log('[HomeScreen] Smart scan pressed');
-    router.push({ pathname: '/scan', params: { type: 'skin' } });
+    // Navigate to smart scan with automatic detection (Universal IA)
+    console.log('[HomeScreen] Universal scan pressed');
+    router.push('/universal-scan');
   };
 
   const handleModuleScan = (scanType: ScanType) => {

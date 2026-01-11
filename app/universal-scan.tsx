@@ -1,0 +1,419 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Animated,
+    Dimensions,
+    Image,
+    Alert,
+    ActivityIndicator,
+} from 'react-native';
+import { router, Stack } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera as CameraIcon, X, Scan, ChevronRight, Activity, ShieldCheck, Search } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import Colors from '@/constants/colors';
+import { AIService } from '@/services/aiService';
+import { ClassificationResult } from '@/types/analysis';
+import { MODULES } from '@/constants/modules';
+
+const { width, height } = Dimensions.get('window');
+
+type ScanStatus = 'idle' | 'capturing' | 'identifying' | 'detected' | 'finished';
+
+export default function UniversalScannerScreen() {
+    const [status, setStatus] = useState<ScanStatus>('idle');
+    const [imageUri, setImageUri] = useState<string | null>(null);
+    const [classification, setClassification] = useState<ClassificationResult | null>(null);
+    const [displayText, setDisplayText] = useState('Alistando visión inteligente...');
+
+    // Animations
+    const scanLineAnim = useRef(new Animated.Value(0)).current;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        if (status === 'identifying') {
+            startScanningAnimation();
+            runClassificationSequence();
+        } else {
+            scanLineAnim.setValue(0);
+        }
+    }, [status]);
+
+    const startScanningAnimation = () => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(scanLineAnim, {
+                    toValue: 1,
+                    duration: 2000,
+                    useNativeDriver: false,
+                }),
+                Animated.timing(scanLineAnim, {
+                    toValue: 0,
+                    duration: 2000,
+                    useNativeDriver: false,
+                }),
+            ])
+        ).start();
+    };
+
+    const runClassificationSequence = async () => {
+        setDisplayText('Buscando patrones...');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        setDisplayText('Identificando zona...');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    };
+
+    const handlePickImage = async () => {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+            Alert.alert('Permiso denegado', 'Necesitamos acceso a la cámara para el escaneo universal.');
+            return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+            base64: true,
+        });
+
+        if (!result.canceled && result.assets[0]) {
+            setImageUri(result.assets[0].uri);
+            setStatus('identifying');
+
+            try {
+                const res = await AIService.classifyImage(result.assets[0].base64!);
+                setClassification(res);
+                setDisplayText(`Zona detectada: ${res.detectedZone}`);
+                setTimeout(() => setStatus('detected'), 2000);
+            } catch (error) {
+                Alert.alert('Error', 'No se pudo clasificar la imagen. Intenta de nuevo.');
+                setStatus('idle');
+            }
+        }
+    };
+
+    const handleGoToDeepAnalysis = () => {
+        if (classification?.recommendedModule) {
+            router.push({
+                pathname: '/scan',
+                params: { type: classification.recommendedModule }
+            });
+        }
+    };
+
+    const translateY = scanLineAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, width * 0.8],
+    });
+
+    return (
+        <View style={styles.container}>
+            <Stack.Screen options={{ headerShown: false }} />
+
+            {/* Header Toolbar */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+                    <X color="#FFFFFF" size={24} />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Escáner Universal IA</Text>
+                <View style={{ width: 40 }} />
+            </View>
+
+            {/* Main Surface */}
+            <View style={styles.cameraSurface}>
+                {imageUri ? (
+                    <View style={styles.previewWrapper}>
+                        <Image source={{ uri: imageUri }} style={styles.previewImage} />
+
+                        {status === 'identifying' && (
+                            <>
+                                <Animated.View style={[styles.scanLine, { top: translateY }]} />
+                                <BlurView intensity={20} style={StyleSheet.absoluteFill} />
+                            </>
+                        )}
+
+                        {/* Visual Markers overlay */}
+                        <View style={styles.markersContainer}>
+                            <View style={[styles.corner, styles.topLeft]} />
+                            <View style={[styles.corner, styles.topRight]} />
+                            <View style={[styles.corner, styles.bottomLeft]} />
+                            <View style={[styles.corner, styles.bottomRight]} />
+                        </View>
+                    </View>
+                ) : (
+                    <TouchableOpacity style={styles.placeholderGrid} onPress={handlePickImage}>
+                        <Search size={48} color="rgba(255,255,255,0.3)" />
+                        <Text style={styles.placeholderText}>Toca para iniciar visión IA</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {/* AI Feedback Panel */}
+            <View style={styles.feedbackPanel}>
+                <View style={styles.statusIndicator}>
+                    <Activity size={20} color={status === 'identifying' ? '#7C3AED' : '#10B981'} />
+                    <Text style={styles.statusText}>{displayText}</Text>
+                </View>
+
+                {status === 'detected' && classification && (
+                    <Animated.View style={styles.resultDetails}>
+                        <LinearGradient
+                            colors={['rgba(124, 58, 237, 0.1)', 'rgba(30, 64, 175, 0.05)']}
+                            style={styles.resultCard}
+                        >
+                            <View style={styles.resultHeader}>
+                                <ShieldCheck size={24} color="#1E40AF" />
+                                <Text style={styles.resultTitle}>Predicción IA</Text>
+                            </View>
+
+                            <Text style={styles.detectedLabel}>
+                                {classification.detectedZone} ({(classification.confidence * 100).toFixed(0)}% confianza)
+                            </Text>
+
+                            <View style={styles.findingsContainer}>
+                                {classification.findings.map((f, i) => (
+                                    <View key={i} style={styles.findingItem}>
+                                        <View style={styles.findingDot} />
+                                        <Text style={styles.findingText}>{f}</Text>
+                                    </View>
+                                ))}
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.deepAnalysisButton}
+                                onPress={handleGoToDeepAnalysis}
+                            >
+                                <LinearGradient
+                                    colors={['#1E40AF', '#7C3AED']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.gradientButton}
+                                >
+                                    <Text style={styles.buttonText}>Ir a análisis profundo</Text>
+                                    <ChevronRight size={18} color="#FFFFFF" />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </LinearGradient>
+                    </Animated.View>
+                )}
+
+                {status === 'idle' && (
+                    <TouchableOpacity style={styles.primaryActionButton} onPress={handlePickImage}>
+                        <CameraIcon size={24} color="#FFFFFF" strokeWidth={2.5} />
+                        <Text style={styles.actionButtonText}>Capturar Imagen</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#0F172A', // Very dark blue/black
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: 60,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+    },
+    closeButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    cameraSurface: {
+        width: width * 0.85,
+        height: width * 0.85,
+        alignSelf: 'center',
+        marginTop: 40,
+        borderRadius: 30,
+        backgroundColor: '#1E293B',
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    previewWrapper: {
+        flex: 1,
+        position: 'relative',
+    },
+    previewImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    scanLine: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: 3,
+        backgroundColor: '#7C3AED',
+        shadowColor: '#7C3AED',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 1,
+        shadowRadius: 10,
+        elevation: 10,
+        zIndex: 10,
+    },
+    markersContainer: {
+        ...StyleSheet.absoluteFillObject,
+        padding: 20,
+    },
+    corner: {
+        position: 'absolute',
+        width: 30,
+        height: 30,
+        borderColor: '#7C3AED',
+        borderWidth: 4,
+    },
+    topLeft: {
+        top: 20,
+        left: 20,
+        borderRightWidth: 0,
+        borderBottomWidth: 0,
+    },
+    topRight: {
+        top: 20,
+        right: 20,
+        borderLeftWidth: 0,
+        borderBottomWidth: 0,
+    },
+    bottomLeft: {
+        bottom: 20,
+        left: 20,
+        borderRightWidth: 0,
+        borderTopWidth: 0,
+    },
+    bottomRight: {
+        bottom: 20,
+        right: 20,
+        borderLeftWidth: 0,
+        borderTopWidth: 0,
+    },
+    placeholderGrid: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 16,
+    },
+    placeholderText: {
+        color: 'rgba(255,255,255,0.5)',
+        fontSize: 15,
+        fontWeight: '500',
+    },
+    feedbackPanel: {
+        flex: 1,
+        marginTop: 40,
+        paddingHorizontal: 20,
+    },
+    statusIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        padding: 12,
+        borderRadius: 16,
+        gap: 10,
+        marginBottom: 20,
+    },
+    statusText: {
+        color: '#E2E8F0',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    resultDetails: {
+        flex: 1,
+    },
+    resultCard: {
+        padding: 20,
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(124, 58, 237, 0.2)',
+    },
+    resultHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 12,
+    },
+    resultTitle: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    detectedLabel: {
+        color: '#E2E8F0',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 16,
+    },
+    findingsContainer: {
+        marginBottom: 24,
+    },
+    findingItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 6,
+    },
+    findingDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#7C3AED',
+    },
+    findingText: {
+        color: '#94A3B8',
+        fontSize: 13,
+    },
+    deepAnalysisButton: {
+        marginTop: 'auto',
+    },
+    gradientButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 16,
+        gap: 8,
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    primaryActionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#334155',
+        paddingVertical: 18,
+        borderRadius: 20,
+        gap: 12,
+        marginTop: 20,
+    },
+    actionButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+});
