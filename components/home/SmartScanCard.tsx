@@ -18,9 +18,8 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
             >
                 {/* Main Content Area */}
                 <View style={styles.mainContent}>
-                    <View style={styles.iconContainer}>
-                        <Camera size={32} color="#FFFFFF" strokeWidth={2.5} />
-                        {/* Glow Effect simulation */}
+                    <View style={styles.iconWrapper}>
+                        <Camera size={38} color="#FFFFFF" strokeWidth={2} />
                         <View style={styles.iconGlow} />
                     </View>
 
@@ -68,23 +67,21 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         zIndex: 2,
     },
-    iconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 18,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    iconWrapper: {
+        width: 48,
+        height: 48,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
+        marginRight: 12,
         position: 'relative',
     },
     iconGlow: {
         position: 'absolute',
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         backgroundColor: '#FFFFFF',
-        opacity: 0.2,
+        opacity: 0.15,
         zIndex: -1,
     },
     textContent: {
