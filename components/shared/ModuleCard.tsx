@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
-import { Camera, HelpCircle, Eye } from 'lucide-react-native';
+import { Camera, HelpCircle, Eye, Smile, User, Hand, Activity } from 'lucide-react-native';
 
 interface ModuleCardProps {
     scanType: ScanType;
@@ -10,12 +10,20 @@ interface ModuleCardProps {
     onHelpPress?: () => void;
 }
 
+const iconMap: Record<string, any> = {
+    camera: Camera,
+    eye: Eye,
+    smile: Smile,
+    user: User,
+    hand: Hand,
+    activity: Activity,
+};
+
 export default function ModuleCard({ scanType, onPress, onHelpPress }: ModuleCardProps) {
     const module = MODULES[scanType];
     const isSpecialized = scanType === 'skin' || scanType === 'ocular';
 
-    // Use Eye icon for ocular, Camera for others
-    const IconComponent = scanType === 'ocular' ? Eye : Camera;
+    const IconComponent = iconMap[module.icon] || Camera;
 
     return (
         <TouchableOpacity
