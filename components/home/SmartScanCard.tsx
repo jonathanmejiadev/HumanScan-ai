@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Zap, Sparkles } from 'lucide-react-native';
+import { Scan, ChevronRight, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import SecurityBadge from './SecurityBadge';
 
 interface SmartScanCardProps {
     onPress: () => void;
@@ -12,35 +11,42 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
             <LinearGradient
-                colors={['#2563EB', '#1D4ED8']}
+                colors={['#1E40AF', '#7C3AED']} // Deep Cobalt Blue to Electric Violet
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.container}
             >
-                <View style={styles.header}>
-                    <View style={styles.statusContainer}>
-                        <View style={styles.statusDot} />
-                        <Text style={styles.statusText}>Sistema Online</Text>
+                {/* Main Content Area */}
+                <View style={styles.mainContent}>
+                    <View style={styles.iconContainer}>
+                        <Scan size={32} color="#FFFFFF" strokeWidth={2.5} />
+                        {/* Glow Effect simulation */}
+                        <View style={styles.iconGlow} />
                     </View>
-                    <View style={styles.securityBadgeWrapper}>
-                        <SecurityBadge />
+
+                    <View style={styles.textContent}>
+                        <Text style={styles.title}>Análisis Universal IA</Text>
+                        <Text style={styles.description}>
+                            Apunta a cualquier zona y deja que la IA identifique y analice el problema por ti.
+                        </Text>
                     </View>
                 </View>
 
-                <View style={styles.iconContainer}>
-                    <Zap size={32} color="#FFFFFF" fill="#FFFFFF" />
+                {/* Bottom Action Area */}
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        style={styles.startButton}
+                        onPress={onPress}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.startButtonText}>Iniciar</Text>
+                        <ChevronRight size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.content}>
-                    <Text style={styles.title}>Escaneo Rápido con IA</Text>
-                    <Text style={styles.description}>
-                        Identificación instantánea de lesiones o irritaciones
-                    </Text>
-                    <Text style={styles.lastAnalysis}>Último análisis: Hoy</Text>
-                </View>
-
+                {/* Decorative Elements */}
                 <View style={styles.decorativeIcon}>
-                    <Sparkles size={80} color="rgba(255, 255, 255, 0.08)" strokeWidth={2} />
+                    <Sparkles size={100} color="rgba(255, 255, 255, 0.1)" strokeWidth={1} />
                 </View>
             </LinearGradient>
         </TouchableOpacity>
@@ -50,83 +56,76 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: 20,
-        marginVertical: 16,
+        marginVertical: 12,
         borderRadius: 24,
         padding: 20,
-        minHeight: 200,
+        minHeight: 160, // Reduced height by 20%
         overflow: 'hidden',
-    },
-    header: {
-        flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-        paddingTop: 16,
-        paddingHorizontal: 12,
-        zIndex: 2,
-        gap: 8,
     },
-    statusContainer: {
+    mainContent: {
         flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        paddingHorizontal: 8,
-        paddingVertical: 6,
-        borderRadius: 12,
-        flexShrink: 0,
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#10B981',
-        marginRight: 6,
-    },
-    statusText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#FFFFFF',
-    },
-    securityBadgeWrapper: {
-        flexShrink: 1,
-        maxWidth: '55%',
-        alignItems: 'flex-end',
+        alignItems: 'flex-start',
+        zIndex: 2,
     },
     iconContainer: {
-        width: 64,
-        height: 64,
+        width: 56,
+        height: 56,
         borderRadius: 18,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
-        zIndex: 1,
+        marginRight: 16,
+        position: 'relative',
     },
-    content: {
-        zIndex: 1,
+    iconGlow: {
+        position: 'absolute',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#FFFFFF',
+        opacity: 0.2,
+        zIndex: -1,
+    },
+    textContent: {
+        flex: 1,
     },
     title: {
-        fontSize: 24,
-        fontWeight: '700',
+        fontSize: 22,
+        fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     description: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#FFFFFF',
-        lineHeight: 22,
-        maxWidth: '90%',
-        marginBottom: 12,
-    },
-    lastAnalysis: {
-        fontSize: 13,
+        fontSize: 14,
         color: 'rgba(255, 255, 255, 0.9)',
-        fontWeight: '600',
+        lineHeight: 20,
+        fontWeight: '500',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        zIndex: 2,
+    },
+    startButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        gap: 4,
+    },
+    startButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14,
     },
     decorativeIcon: {
         position: 'absolute',
-        right: -20,
-        bottom: -20,
+        right: -30,
+        top: -30,
+        zIndex: 1,
     },
 });
