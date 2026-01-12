@@ -62,20 +62,20 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
             elevation: 5,
         }}>
             <TouchableOpacity
-                style={[styles.touchableWrapper, { borderColor: module.accentColor + '26' }]} // 15% opacity
+                style={styles.touchableWrapper}
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={1}
             >
                 <LinearGradient
-                    colors={[module.accentColor + '1A', '#FFFFFF']}
+                    colors={[module.accentColor + '14', '#FFFFFF']} // 8% opacity (14 hex)
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}
                 >
                     {/* Left: Icon */}
-                    <View style={[styles.iconContainer, { borderColor: module.accentColor }]}>
+                    <View style={[styles.iconContainer, { borderColor: module.accentColor, backgroundColor: module.accentColor + '0D' }]}>
                         <CategoryIcon scanType={scanType} size={22} color={module.accentColor} />
                     </View>
 
@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderRadius: 24,
         backgroundColor: '#FFFFFF',
-        borderWidth: 1,
         overflow: 'hidden',
     },
     mainContainer: {
@@ -125,10 +124,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     iconContainer: {
-        width: 48, // Standardized with ToolsCarousel
+        width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: '#FFFFFF',
         borderWidth: 1.5,
         justifyContent: 'center',
         alignItems: 'center',
@@ -157,9 +155,9 @@ const styles = StyleSheet.create({
     },
     badge: {
         backgroundColor: '#F3F4F6', // Soft grey capsule
-        paddingHorizontal: 12,
+        paddingHorizontal: 10,
         paddingVertical: 4,
-        borderRadius: 16,
+        borderRadius: 20,
     },
     badgeText: {
         fontSize: 10,
