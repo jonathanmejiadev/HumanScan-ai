@@ -59,8 +59,8 @@ const ToolCard = ({ title, subtitle, icon, color, onPress }: ToolCardProps) => {
             style={[
                 styles.card,
                 {
-                    backgroundColor: color + '05', // 2% approx (5/255)
-                    borderColor: color + '26', // 15% (38/255 = 0.149)
+                    backgroundColor: '#FFFFFF',
+                    borderColor: color + '1A', // 10% opacity
                     shadowColor: color,
                     shadowOpacity: shadowAnim,
                     transform: [{ scale: scaleAnim }],
@@ -159,10 +159,10 @@ const styles = StyleSheet.create({
         width: 144,
         height: 126,
         borderRadius: 20,
-        borderWidth: 1.2,
+        borderWidth: 1,
         // Shadows (Glow effect)
         shadowOffset: { width: 0, height: 0 },
-        shadowRadius: 12,
+        shadowRadius: 10,
         elevation: 4,
     },
     pressable: {
