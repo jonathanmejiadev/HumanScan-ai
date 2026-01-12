@@ -46,7 +46,8 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 15,
-        color: '#6B7280',
+        color: '#4B5563',
+        lineHeight: 22,
     },
     avatarContainer: {
         marginLeft: 16,

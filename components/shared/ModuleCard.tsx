@@ -22,38 +22,56 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
     // Default gradient if not specified
     const gradientColors = module.gradientColors || ['#FFFFFF', '#FFFFFF'];
 
+    const shadowAnim = useRef(new Animated.Value(0.07)).current;
+
     const handlePressIn = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 0.98,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 0.96,
+                useNativeDriver: true,
+            }),
+            Animated.timing(shadowAnim, {
+                toValue: 0.04,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     const handlePressOut = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                useNativeDriver: true,
+            }),
+            Animated.timing(shadowAnim, {
+                toValue: 0.07,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+        ]).start();
     };
 
     return (
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <Animated.View style={{
+            transform: [{ scale: scaleAnim }],
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: shadowAnim,
+            shadowRadius: 10,
+            elevation: 5,
+        }}>
             <TouchableOpacity
-                style={styles.touchableWrapper}
+                style={[styles.touchableWrapper, { borderColor: module.accentColor + '26' }]} // 15% opacity
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                activeOpacity={0.9}
+                activeOpacity={1}
             >
-                <LinearGradient
-                    colors={gradientColors}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={[styles.gradientContainer, fullDescription && { paddingVertical: 20 }]}
-                >
+                <View style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}>
                     {/* Left: Icon */}
-                    <View style={[styles.iconContainer, { backgroundColor: module.accentColor }]}>
-                        <CategoryIcon scanType={scanType} size={24} color="#FFFFFF" />
+                    <View style={[styles.iconContainer, { borderColor: module.accentColor }]}>
+                        <CategoryIcon scanType={scanType} size={24} color={module.accentColor} />
                     </View>
 
                     {/* Center: Content */}
@@ -79,9 +97,12 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
 
                     {/* Right: Chevron */}
                     <View style={styles.arrowContainer}>
-                        <ChevronRight size={24} color="#9CA3AF" />
+                        <ChevronRight size={20} color="#9CA3AF" />
                     </View>
-                </LinearGradient>
+
+                    {/* Identity Bar */}
+                    <View style={[styles.identityBar, { backgroundColor: module.accentColor }]} />
+                </View>
             </TouchableOpacity>
         </Animated.View>
     );
@@ -91,25 +112,21 @@ const styles = StyleSheet.create({
     touchableWrapper: {
         marginBottom: 16,
         borderRadius: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 3,
-        backgroundColor: 'transparent',
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
+        overflow: 'hidden',
     },
-    gradientContainer: {
+    mainContainer: {
         flexDirection: 'row',
         padding: 16,
         alignItems: 'center',
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: '#F3F4F6',
     },
     iconContainer: {
-        width: 56,
-        height: 56,
-        borderRadius: 16,
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1.5,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
@@ -151,5 +168,14 @@ const styles = StyleSheet.create({
     arrowContainer: {
         justifyContent: 'center',
         alignItems: 'center',
+        marginRight: 4,
+    },
+    identityBar: {
+        position: 'absolute',
+        bottom: 0,
+        left: '15%',
+        right: '15%',
+        height: 3,
+        borderRadius: 1.5,
     },
 });
