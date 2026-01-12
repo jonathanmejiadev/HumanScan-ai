@@ -25,13 +25,13 @@ const ToolCard = ({ title, subtitle, icon, color, onPress }: ToolCardProps) => {
     const handlePressIn = () => {
         Animated.parallel([
             Animated.spring(scaleAnim, {
-                toValue: 0.96,
+                toValue: 0.97, // Adjusted to 0.97
                 useNativeDriver: true,
                 tension: 100,
                 friction: 10,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.06,
+                toValue: 0.04,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -47,7 +47,7 @@ const ToolCard = ({ title, subtitle, icon, color, onPress }: ToolCardProps) => {
                 friction: 10,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.12,
+                toValue: 0.07,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -60,8 +60,8 @@ const ToolCard = ({ title, subtitle, icon, color, onPress }: ToolCardProps) => {
                 styles.card,
                 {
                     backgroundColor: '#FFFFFF',
-                    borderColor: color + '1A', // 10% opacity
-                    shadowColor: color,
+                    borderColor: color + '26', // 15% opacity
+                    shadowColor: '#000000',
                     shadowOpacity: shadowAnim,
                     transform: [{ scale: scaleAnim }],
                 }
@@ -105,6 +105,7 @@ export default function ToolsCarousel({ onToolPress }: ToolsCarouselProps) {
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.toolScroll}
                 contentContainerStyle={styles.scrollContent}
                 snapToInterval={160} // card width + margin (144 + 16)
                 decelerationRate="fast"
@@ -150,9 +151,12 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#1F2937',
     },
+    toolScroll: {
+        marginTop: -20,
+        paddingVertical: 20,
+    },
     scrollContent: {
         paddingHorizontal: 20,
-        paddingBottom: 10,
         gap: 16,
     },
     card: {
@@ -160,10 +164,10 @@ const styles = StyleSheet.create({
         height: 126,
         borderRadius: 20,
         borderWidth: 1,
-        // Shadows (Glow effect)
-        shadowOffset: { width: 0, height: 0 },
+        // Elevation Shadows
+        shadowOffset: { width: 0, height: 4 },
         shadowRadius: 10,
-        elevation: 4,
+        elevation: 5,
     },
     pressable: {
         flex: 1,
