@@ -170,6 +170,19 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         badges: ['Insecto', 'Eritema', 'Reacción'],
         specialist: 'Médico General',
         instructions: 'Centra la picadura y trata de captar los bordes de la reacción inflamatoria'
+    },
+    medication: {
+        id: 'medication',
+        name: 'Medicamentos',
+        description: 'Identificación de fármacos, dosis y usos terapéuticos.',
+        icon: 'pill',
+        color: '#F0FDFA',
+        accentColor: '#0D9488',
+        gradientColors: ['#CCFBF1', '#FFFFFF'], // Teal 100 -> Blanco
+        overlayType: 'rectangle',
+        badges: ['Fórmula', 'Dosis', 'Uso'],
+        specialist: 'Farmacéutico',
+        instructions: 'Apunta a la caja o etiqueta para leer el nombre y componentes del medicamento'
     }
 };
 

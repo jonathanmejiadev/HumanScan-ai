@@ -1,16 +1,12 @@
 export type RiskLevel = 'Bajo' | 'Medio' | 'Alto' | 'Emergencia';
 
-export type ScanType = 'skin' | 'ocular' | 'dental' | 'posture' | 'nails' | 'wound' | 'capillary' | 'throat' | 'veins' | 'pediatrics' | 'intimate' | 'bites';
+export type ScanType = 'skin' | 'ocular' | 'dental' | 'posture' | 'nails' | 'wound' | 'capillary' | 'throat' | 'veins' | 'pediatrics' | 'intimate' | 'bites' | 'medication';
 
-export type SpecialistType = 'Dermatólogo' | 'Oftalmólogo' | 'Médico General' | 'Odontólogo' | 'Fisioterapeuta' | 'Traumatólogo' | 'Cirujano' | 'Pediatra' | 'Urólogo' | 'Ginecólogo';
+export type SpecialistType = 'Dermatólogo' | 'Oftalmólogo' | 'Médico General' | 'Odontólogo' | 'Fisioterapeuta' | 'Traumatólogo' | 'Cirujano' | 'Pediatra' | 'Urólogo' | 'Ginecólogo' | 'Farmacéutico';
 
 export type OverlayType = 'rectangle' | 'circle' | 'oval' | 'grid' | 'comparison';
 
-export interface AnalysisResult {
-  id: string;
-  timestamp: number;
-  scanType: ScanType;
-  imageUri: string;
+export interface MedicalAnalysisContent {
   descripcion_tecnica: string;
   hallazgos_principales: string[];
   triaje_riesgo: RiskLevel;
@@ -20,6 +16,23 @@ export interface AnalysisResult {
   pasos_a_seguir: string;
   aviso_legal: string;
 }
+
+export interface MedicationAnalysisContent {
+  nombre_detectado: string;
+  concentracion: string;
+  para_que_sirve: string;
+  como_se_toma: string;
+  advertencias_clave: string[];
+  efectos_secundarios_comunes: string[];
+  aviso_legal: string;
+}
+
+export type AnalysisResult = {
+  id: string;
+  timestamp: number;
+  scanType: ScanType;
+  imageUri: string;
+} & (MedicalAnalysisContent | MedicationAnalysisContent);
 
 export interface ScanHistoryItem {
   id: string;

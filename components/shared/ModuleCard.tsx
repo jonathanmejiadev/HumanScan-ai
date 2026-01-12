@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
-import { Camera, HelpCircle, Eye, Smile, User, Hand, Activity, ChevronRight, Scan, Baby, ShieldAlert, Bug } from 'lucide-react-native';
+import { Camera, HelpCircle, Eye, Smile, User, Hand, Activity, ChevronRight, Scan, Baby, ShieldAlert, Bug, Pill } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface ModuleCardProps {
@@ -23,6 +23,7 @@ const iconMap: Record<string, any> = {
     baby: Baby,
     'shield-alert': ShieldAlert,
     bug: Bug,
+    pill: Pill,
 };
 
 export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescription = false }: ModuleCardProps) {

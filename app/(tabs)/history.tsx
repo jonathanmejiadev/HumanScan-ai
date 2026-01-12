@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Clock, Scan, Eye, ChevronRight, Inbox, Trash2 } from 'lucide-react-native';
+import { Clock, Scan, Eye, ChevronRight, Inbox, Trash2, Pill } from 'lucide-react-native';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import Colors from '@/constants/colors';
 import { AnalysisResult, RiskLevel } from '@/types/analysis';
@@ -88,29 +88,32 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
             )}
           </View>
         )}
-        <View style={[styles.typeIndicator, { backgroundColor: item.scanType === 'skin' ? Colors.skinScan : Colors.eyeScan }]}>
-          {item.scanType === 'skin' ? (
-            <Scan color={Colors.textInverse} size={12} />
-          ) : (
-            <Eye color={Colors.textInverse} size={12} />
-          )}
+        <View style={[styles.typeIndicator, { backgroundColor: moduleInfo.accentColor }]}>
+          {item.scanType === 'skin' && <Scan color={Colors.textInverse} size={12} />}
+          {item.scanType === 'ocular' && <Eye color={Colors.textInverse} size={12} />}
+          {item.scanType === 'medication' && <Pill color={Colors.textInverse} size={12} />}
+          {!['skin', 'ocular', 'medication'].includes(item.scanType) && <Scan color={Colors.textInverse} size={12} />}
         </View>
       </View>
 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            Análisis {moduleInfo.name}
+            {item.scanType === 'medication' ? 'Medicamento' : `Análisis ${moduleInfo.name}`}
           </Text>
-          <View style={[styles.riskBadge, { backgroundColor: getRiskBgColor(item.triaje_riesgo) }]}>
-            <Text style={[styles.riskText, { color: getRiskColor(item.triaje_riesgo) }]}>
-              {item.triaje_riesgo}
-            </Text>
-          </View>
+          {item.scanType !== 'medication' && (
+            <View style={[styles.riskBadge, { backgroundColor: getRiskBgColor((item as any).triaje_riesgo) }]}>
+              <Text style={[styles.riskText, { color: getRiskColor((item as any).triaje_riesgo) }]}>
+                {(item as any).triaje_riesgo}
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text style={styles.findingsText} numberOfLines={2}>
-          {item.hallazgos_principales.slice(0, 2).join(', ')}
+          {item.scanType === 'medication'
+            ? `${(item as any).nombre_detectado} - ${(item as any).concentracion}`
+            : (item as any).hallazgos_principales?.slice(0, 2).join(', ') || ''}
         </Text>
 
         <View style={styles.cardFooter}>

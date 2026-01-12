@@ -22,6 +22,7 @@ import {
   Share2,
   ChevronDown,
   ChevronUp,
+  Pill,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
@@ -102,9 +103,17 @@ export default function ResultScreen() {
     if (!result) return;
 
     try {
-      await Share.share({
-        message: `Resultado de Análisis HumanScan\n\nTipo: ${result.scanType === 'skin' ? 'Dermatológico' : 'Ocular'}\nRiesgo: ${result.triaje_riesgo}\n\nHallazgos:\n${result.hallazgos_principales.join('\n')}\n\nEspecialista recomendado: ${result.especialista_recomendado}\n\n${result.aviso_legal}`,
-      });
+      if (result.scanType === 'medication') {
+        const med = result as any;
+        await Share.share({
+          message: `Identificación de Medicamento - HumanScan\n\nNombre: ${med.nombre_detectado}\nConcentración: ${med.concentracion}\nUso: ${med.para_que_sirve}\n\n${med.aviso_legal}`,
+        });
+      } else {
+        const res = result as any;
+        await Share.share({
+          message: `Resultado de Análisis HumanScan\n\nTipo: ${result.scanType}\nRiesgo: ${res.triaje_riesgo}\n\nHallazgos:\n${res.hallazgos_principales.join('\n')}\n\nEspecialista recomendado: ${res.especialista_recomendado}\n\n${res.aviso_legal}`,
+        });
+      }
     } catch (error) {
       console.error('[ResultScreen] Share error:', error);
     }
@@ -178,91 +187,150 @@ export default function ResultScreen() {
           </View>
         </View>
 
-        <LinearGradient
-          colors={getRiskGradient(result.triaje_riesgo)}
-          style={styles.riskCard}
-        >
-          <View style={styles.riskHeader}>
-            <Text style={styles.riskLabel}>Nivel de Riesgo</Text>
-            <View style={[styles.riskBadge, { backgroundColor: getRiskColor(result.triaje_riesgo) }]}>
-              <Text style={styles.riskBadgeText}>{result.triaje_riesgo}</Text>
-            </View>
-          </View>
-          <Text style={[styles.riskMessage, { color: getRiskColor(result.triaje_riesgo) }]}>
-            {getRiskMessage(result.triaje_riesgo)}
-          </Text>
-        </LinearGradient>
-
-        <CollapsibleSection
-          title="Descripción Técnica"
-          icon={<ClipboardList color={Colors.primary} size={20} />}
-        >
-          <Text style={styles.descriptionText}>{result.descripcion_tecnica}</Text>
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Hallazgos Principales"
-          icon={<AlertTriangle color={Colors.warning} size={20} />}
-        >
-          {result.hallazgos_principales.map((hallazgo, index) => (
-            <View key={index} style={styles.findingItem}>
-              <View style={styles.findingBullet} />
-              <Text style={styles.findingText}>{hallazgo}</Text>
-            </View>
-          ))}
-        </CollapsibleSection>
-
-        {result.analisis_abcde_detalle !== 'N/A' && result.analisis_abcde_detalle !== 'N/A - Criterio específico para lesiones cutáneas' && (
-          <CollapsibleSection
-            title="Análisis ABCDE"
-            icon={<Scan color={Colors.skinScan} size={20} />}
-            defaultOpen={false}
-          >
-            <Text style={styles.descriptionText}>{result.analisis_abcde_detalle}</Text>
-          </CollapsibleSection>
-        )}
-
-        <CollapsibleSection
-          title="Especialista Recomendado"
-          icon={<UserCheck color={Colors.secondary} size={20} />}
-        >
-          <View style={styles.specialistCard}>
-            <View style={styles.specialistIcon}>
-              <UserCheck color={Colors.secondary} size={24} />
-            </View>
-            <View style={styles.specialistInfo}>
-              <Text style={styles.specialistName}>{result.especialista_recomendado}</Text>
-              <Text style={styles.specialistHint}>
-                Agenda una consulta para evaluación profesional
-              </Text>
-            </View>
-          </View>
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Guía de Consulta"
-          icon={<MessageCircle color={Colors.info} size={20} />}
-        >
-          <Text style={styles.guideIntro}>
-            Preguntas sugeridas para tu consulta médica:
-          </Text>
-          {result.guia_de_consulta.map((pregunta, index) => (
-            <View key={index} style={styles.questionItem}>
-              <View style={styles.questionNumber}>
-                <Text style={styles.questionNumberText}>{index + 1}</Text>
+        {result.scanType === 'medication' ? (
+          <>
+            <CollapsibleSection
+              title="Identificación del Producto"
+              icon={<Pill color={Colors.primary} size={20} />}
+            >
+              <View style={styles.medicationRow}>
+                <Text style={styles.medicationLabel}>Nombre/Principio:</Text>
+                <Text style={styles.medicationValue}>{(result as any).nombre_detectado}</Text>
               </View>
-              <Text style={styles.questionText}>{pregunta}</Text>
-            </View>
-          ))}
-        </CollapsibleSection>
+              <View style={styles.medicationRow}>
+                <Text style={styles.medicationLabel}>Concentración:</Text>
+                <Text style={styles.medicationValue}>{(result as any).concentracion}</Text>
+              </View>
+            </CollapsibleSection>
 
-        <CollapsibleSection
-          title="Pasos a Seguir"
-          icon={<ClipboardList color={Colors.primary} size={20} />}
-          defaultOpen={false}
-        >
-          <Text style={styles.descriptionText}>{result.pasos_a_seguir}</Text>
-        </CollapsibleSection>
+            <CollapsibleSection
+              title="Para qué sirve"
+              icon={<ClipboardList color={Colors.info} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).para_que_sirve}</Text>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Cómo se toma"
+              icon={<UserCheck color={Colors.secondary} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).como_se_toma}</Text>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Advertencias Clave"
+              icon={<AlertTriangle color={Colors.warning} size={20} />}
+            >
+              {(result as any).advertencias_clave.map((item: string, index: number) => (
+                <View key={index} style={styles.findingItem}>
+                  <View style={[styles.findingBullet, { backgroundColor: Colors.warning }]} />
+                  <Text style={styles.findingText}>{item}</Text>
+                </View>
+              ))}
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Efectos Secundarios"
+              icon={<AlertTriangle color={Colors.riskHigh} size={20} />}
+              defaultOpen={false}
+            >
+              {(result as any).efectos_secundarios_comunes.map((item: string, index: number) => (
+                <View key={index} style={styles.findingItem}>
+                  <View style={[styles.findingBullet, { backgroundColor: Colors.riskHigh }]} />
+                  <Text style={styles.findingText}>{item}</Text>
+                </View>
+              ))}
+            </CollapsibleSection>
+          </>
+        ) : (
+          <>
+            <LinearGradient
+              colors={getRiskGradient((result as any).triaje_riesgo)}
+              style={styles.riskCard}
+            >
+              <View style={styles.riskHeader}>
+                <Text style={styles.riskLabel}>Nivel de Riesgo</Text>
+                <View style={[styles.riskBadge, { backgroundColor: getRiskColor((result as any).triaje_riesgo) }]}>
+                  <Text style={styles.riskBadgeText}>{(result as any).triaje_riesgo}</Text>
+                </View>
+              </View>
+              <Text style={[styles.riskMessage, { color: getRiskColor((result as any).triaje_riesgo) }]}>
+                {getRiskMessage((result as any).triaje_riesgo)}
+              </Text>
+            </LinearGradient>
+
+            <CollapsibleSection
+              title="Descripción Técnica"
+              icon={<ClipboardList color={Colors.primary} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).descripcion_tecnica}</Text>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Hallazgos Principales"
+              icon={<AlertTriangle color={Colors.warning} size={20} />}
+            >
+              {(result as any).hallazgos_principales.map((hallazgo: string, index: number) => (
+                <View key={index} style={styles.findingItem}>
+                  <View style={styles.findingBullet} />
+                  <Text style={styles.findingText}>{hallazgo}</Text>
+                </View>
+              ))}
+            </CollapsibleSection>
+
+            {(result as any).analisis_abcde_detalle !== 'N/A' && (result as any).analisis_abcde_detalle !== 'N/A - Criterio específico para lesiones cutáneas' && (
+              <CollapsibleSection
+                title="Análisis ABCDE"
+                icon={<Scan color={Colors.skinScan} size={20} />}
+                defaultOpen={false}
+              >
+                <Text style={styles.descriptionText}>{(result as any).analisis_abcde_detalle}</Text>
+              </CollapsibleSection>
+            )}
+
+            <CollapsibleSection
+              title="Especialista Recomendado"
+              icon={<UserCheck color={Colors.secondary} size={20} />}
+            >
+              <View style={styles.specialistCard}>
+                <View style={styles.specialistIcon}>
+                  <UserCheck color={Colors.secondary} size={24} />
+                </View>
+                <View style={styles.specialistInfo}>
+                  <Text style={styles.specialistName}>{(result as any).especialista_recomendado}</Text>
+                  <Text style={styles.specialistHint}>
+                    Agenda una consulta para evaluación profesional
+                  </Text>
+                </View>
+              </View>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Guía de Consulta"
+              icon={<MessageCircle color={Colors.info} size={20} />}
+            >
+              <Text style={styles.guideIntro}>
+                Preguntas sugeridas para tu consulta médica:
+              </Text>
+              {(result as any).guia_de_consulta.map((pregunta: string, index: number) => (
+                <View key={index} style={styles.questionItem}>
+                  <View style={styles.questionNumber}>
+                    <Text style={styles.questionNumberText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.questionText}>{pregunta}</Text>
+                </View>
+              ))}
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Pasos a Seguir"
+              icon={<ClipboardList color={Colors.primary} size={20} />}
+              defaultOpen={false}
+            >
+              <Text style={styles.descriptionText}>{(result as any).pasos_a_seguir}</Text>
+            </CollapsibleSection>
+          </>
+        )}
 
         <View style={styles.disclaimerSection}>
           <View style={styles.disclaimerIcon}>
@@ -557,5 +625,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600' as const,
     color: Colors.textInverse,
+  },
+  medicationRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    flexWrap: 'wrap',
+  },
+  medicationLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    marginRight: 8,
+  },
+  medicationValue: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    flex: 1,
   },
 });

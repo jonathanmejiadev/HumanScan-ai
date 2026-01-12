@@ -15,30 +15,45 @@ const analysisSchema = z.object({
   aviso_legal: z.string().describe('Aviso legal obligatorio'),
 });
 
-const SKIN_ANALYSIS_PROMPT = `Actúas como un asistente avanzado de análisis visual para la salud humana, especializado en la detección preliminar de afecciones dermatológicas.
+const medicationSchema = z.object({
+  nombre_detectado: z.string().describe('Nombre comercial detectado y principio activo (Ej: Actron - Ibuprofeno).'),
+  concentracion: z.string().describe('Potencia visible (Ej: 600mg, 10ml). Si no es visible, poner "No identificada".'),
+  para_que_sirve: z.string().describe('Explicación breve y sencilla del uso terapéutico.'),
+  como_se_toma: z.string().describe('Pautas generales de administración, aclarando que requiere receta médica.'),
+  advertencias_clave: z.array(z.string()).describe('Lista de 3-4 precauciones importantes (Ej: Alcohol, Embarazo).'),
+  efectos_secundarios_comunes: z.array(z.string()).describe('Lista breve de efectos adversos frecuentes.'),
+  aviso_legal: z.string().describe('Texto fijo: "La automedicación es peligrosa. Consulte siempre a su médico."'),
+});
 
-Tu misión es analizar la imagen proporcionada y generar un reporte técnico y orientativo sobre hallazgos visuales. Debes categorizar la gravedad de lo observado.
-
-Instrucciones de Análisis:
-1. Evaluación de Lesiones (ABCDE): Ante manchas o lunares, analiza: Asimetría, Bordes (regulares/irregulares), Color (homogéneo/múltiple), Diámetro y Evolución visual.
-2. Identificación de Patrones: Busca signos de inflamación, infecciones fúngicas, reacciones alérgicas cutáneas, acné, dermatitis, psoriasis, u otras anomalías.
-3. Si la imagen no es clara o no muestra piel, indica que no es apta para análisis.
-
-IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje determinista (ej. "Usted tiene..."); usa lenguaje de probabilidad (ej. "Los hallazgos son compatibles con...", "Se observan características que podrían sugerir...").
-
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional."
-
-IMPORTANTE: Responde ÚNICAMENTE con un JSON válido que siga exactamente esta estructura:
+const JSON_FORMAT_INSTRUCTION = `
+IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido. Está terminantemente prohibido incluir introducciones, explicaciones previas, comentarios o bloques de código markdown. 
+Responde ÚNICAMENTE con un JSON que cumpla estrictamente este esquema:
 {
   "descripcion_tecnica": "string",
   "hallazgos_principales": ["string"],
   "triaje_riesgo": "Bajo" | "Medio" | "Alto" | "Emergencia",
   "analisis_abcde_detalle": "string",
-  "especialista_recomendado": "Dermatólogo" | "Oftalmólogo" | "Médico General",
+  "especialista_recomendado": "Dermatólogo" | "Oftalmólogo" | "Médico General" | "Odontólogo" | "Fisioterapeuta" | "Traumatólogo" | "Cirujano" | "Pediatra" | "Urólogo" | "Ginecólogo",
   "guia_de_consulta": ["string", "string", "string"],
   "pasos_a_seguir": "string",
   "aviso_legal": "string"
 }`;
+
+const SKIN_ANALYSIS_PROMPT = `Actúas como un asistente avanzado de análisis visual para la salud humana, especializado en la detección preliminar de afecciones dermatológicas.
+
+Tu misión es analizar la imagen proporcionada y generar un reporte técnico y orientativo sobre hallazgos visuales. Debes categorizar la gravedad de lo observado.
+
+Instrucciones de Análisis Clínico:
+1. Evaluación de Lesiones (ABCDE): Ante manchas o lunares, analiza: Asimetría, Bordes (regulares/irregulares), Color (homogéneo/múltiple), Diámetro y Evolución visual.
+2. Actividad vs. Estabilidad: Si una lesión es asimétrica pero se describe como antigua/estable y no tiene signos de actividad (sangrado, costras nuevas, inflamación perilesional, secreción), clasifica el riesgo como 'Bajo'.
+3. Identificación de Patrones: Busca signos de inflamación, infecciones fúngicas, reacciones alérgicas cutáneas, acné, dermatitis, psoriasis, u otras anomalías.
+4. Si la imagen no es clara o no muestra piel, indica que no es apta para análisis.
+
+IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje determinista; usa lenguaje de probabilidad.
+
+El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional."
+
+${JSON_FORMAT_INSTRUCTION}`;
 
 const OCULAR_ANALYSIS_PROMPT = `Actúas como un asistente avanzado de análisis visual para la salud humana, especializado en la detección preliminar de afecciones oculares.
 
@@ -55,17 +70,7 @@ Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones 
 
 El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional."
 
-IMPORTANTE: Responde ÚNICAMENTE con un JSON válido que siga exactamente esta estructura:
-{
-  "descripcion_tecnica": "string",
-  "hallazgos_principales": ["string"],
-  "triaje_riesgo": "Bajo" | "Medio" | "Alto" | "Emergencia",
-  "analisis_abcde_detalle": "string",
-  "especialista_recomendado": "Dermatólogo" | "Oftalmólogo" | "Médico General",
-  "guia_de_consulta": ["string", "string", "string"],
-  "pasos_a_seguir": "string",
-  "aviso_legal": "string"
-}`;
+${JSON_FORMAT_INSTRUCTION}`;
 
 const POSTURE_ANALYSIS_PROMPT = `Actúas como un asistente avanzado de análisis visual para la salud humana, especializado en la evaluación preliminar de la postura corporal.
 
@@ -88,69 +93,80 @@ Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones 
 
 El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un fisioterapeuta o traumatólogo para obtener un diagnóstico y tratamiento profesional."
 
-IMPORTANTE: Responde ÚNICAMENTE con un JSON válido que siga exactamente esta estructura:
-{
-  "descripcion_tecnica": "string",
-  "hallazgos_principales": ["string"],
-  "triaje_riesgo": "Bajo" | "Medio" | "Alto" | "Emergencia",
-  "analisis_abcde_detalle": "string",
-  "especialista_recomendado": "Fisioterapeuta" | "Traumatólogo",
-  "guia_de_consulta": ["string", "string", "string"],
-  "pasos_a_seguir": "string",
-  "aviso_legal": "string"
-}`;
+${JSON_FORMAT_INSTRUCTION}`;
 
 const CAPILLARY_ANALYSIS_PROMPT = `Actúas como un experto en salud capilar. Analiza la imagen del cuero cabelludo o cabello buscando:
 1. Densidad folicular y zonas de adelgazamiento.
 2. Salud del cuero cabelludo (rojeces, descamación, caspa, sebo).
 3. Línea capilar y patrones de retroceso.
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Dermatólogo.`;
+${JSON_FORMAT_INSTRUCTION}`;
 
 const THROAT_ANALYSIS_PROMPT = `Actúas como un asistente de salud especializado en otorrinolaringología. Analiza la imagen de la garganta buscando:
-1. Estado de amígdalas (inflamación, tamaño, presencia de placas blanquecinas).
-2. Úvula y faringe posterior (coloración, irritación).
-3. Signos de infección viral o bacteriana sugeridos visualmente.
+1. Diferenciación de Riesgo:
+   - Riesgo Bajo: Irritación simple, enrojecimiento leve sin placas.
+   - Riesgo Alto/Emergencia: Exudado purulento (placas blancas), inflamación severa de amígdalas que dificulte la deglución, o signos compatibles con fiebre alta según descripción.
+2. Estado de amígdalas (inflamación, tamaño, presencia de placas blanquecinas).
+3. Úvula y faringe posterior (coloración, irritación).
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Médico General.`;
+${JSON_FORMAT_INSTRUCTION}`;
 
 const VEINS_ANALYSIS_PROMPT = `Actúas como especialista en salud vascular. Analiza la imagen de las piernas buscando:
-1. Venas dilatadas o tortuosas (varices).
-2. Arañitas vasculares (telangiectasias).
-3. Cambios en la coloración de la piel o signos de inflamación/edema.
+1. Graduación de Insuficiencia Venosa:
+   - Riesgo Bajo: "Arañitas" o telangiectasias puramente estéticas.
+   - Riesgo Medio: Venas abultadas, tortuosas o cordones venosos (varices).
+   - Riesgo Alto: Úlceras abiertas, cambios de coloración oscura/ocre en los tobillos o inflamación severa (edema).
+2. Cambios en la coloración de la piel o signos de inflamación.
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Traumatólogo o Cirujano.`;
+${JSON_FORMAT_INSTRUCTION}`;
 
 const PEDIATRICS_ANALYSIS_PROMPT = `Actúas como pediatra experto en dermatología infantil. Analiza la imagen buscando:
 1. Tipo de exantema o brote (distribución, forma, color).
 2. Signos compatibles con varicela, sarampión u otras enfermedades eruptivas.
 3. Reacciones alérgicas comunes en niños.
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Pediatra.`;
+${JSON_FORMAT_INSTRUCTION}`;
 
-const INTIMATE_ANALYSIS_PROMPT = `Actúas como un asistente médico profesional y discreto para salud íntima. Analiza la imagen buscando:
-1. Presencia de verrugas, llagas o úlceras.
-2. Protuberancias inusuales o irritaciones severas.
-3. Cambios en la mucosa que requieran atención inmediata.
+const INTIMATE_ANALYSIS_PROMPT = `Actúas como un asistente médico profesional y discreto para salud íntima. Analiza la imagen buscando verrugas, llagas o úlceras.
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Médico General, Ginecólogo o Urólogo.`;
+Lógica de Direccionamiento de Especialista:
+- Si detectas anatomía masculina con lesiones, recomienda 'Urólogo'.
+- Si detectas anatomía femenina con lesiones, recomienda 'Ginecólogo'.
+- Si las lesiones parecen ser puramente dermatológicas (irritación, eccema cutáneo) sin compromiso evidente de órganos reproductivos, recomienda 'Dermatólogo'.
+- En caso de duda sobre la anatomía, recomienda 'Médico General'.
+
+${JSON_FORMAT_INSTRUCTION}`;
 
 const BITES_ANALYSIS_PROMPT = `Actúas como experto en toxicología y dermatología. Analiza la imagen de la picadura buscando:
-1. Punto central de picada y patrón (única, múltiple, lineal).
-2. Reacción inflamatoria (eritema, edema, ampollas).
-3. Signos de alarma (necrosis, expansión rápida del halo).
+1. Signos de Alarma: Necrosis central (punto negro), eritema migrante (patrón de "ojo de buey" con halo expansivo), o ampollas grandes. Riesgo: Alto.
+2. Picadura Común: Pápula roja simple, prurito leve sin expansión sistémica. Riesgo: Bajo.
+3. Patrón de picada y reacción inflamatoria.
 
-Genera un reporte técnico siguiendo el formato JSON especificado.
-Especialista recomendado: Médico General.`;
+${JSON_FORMAT_INSTRUCTION}`;
+
+const MEDICATION_ANALYSIS_PROMPT = `Actúas como un Farmacéutico Experto. Tu misión es analizar imágenes de cajas, blísteres, frascos o etiquetas de medicamentos para identificar el producto y proporcionar información clave.
+
+Instrucciones:
+1. Extrae el nombre comercial y el principio activo.
+2. Identifica la concentración (ej. 500mg, 10ml).
+3. Explica su uso principal, administración y advertencias importantes.
+4. Si la imagen NO es un medicamento, intenta identificar qué es o indica que no se reconoce como fármaco.
+
+IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esquema:
+{
+  "nombre_detectado": "string",
+  "concentracion": "string",
+  "para_que_sirve": "string",
+  "como_se_toma": "string",
+  "advertencias_clave": ["string"],
+  "efectos_secundarios_comunes": ["string"],
+  "aviso_legal": "La automedicación es peligrosa. Consulte siempre a su médico."
+}`;
 
 export async function analyzeImage(
   imageBase64: string,
-  scanType: ScanType
+  scanType: ScanType,
+  userNotes: string = ""
 ): Promise<Omit<AnalysisResult, 'id' | 'timestamp' | 'scanType' | 'imageUri'>> {
   let prompt: string;
 
@@ -191,6 +207,9 @@ export async function analyzeImage(
     case 'bites':
       prompt = BITES_ANALYSIS_PROMPT;
       break;
+    case 'medication':
+      prompt = MEDICATION_ANALYSIS_PROMPT;
+      break;
     default:
       prompt = SKIN_ANALYSIS_PROMPT;
   }
@@ -220,7 +239,7 @@ export async function analyzeImage(
           {
             role: "user",
             parts: [
-              { text: prompt },
+              { text: prompt + (userNotes ? `\n\nContexto adicional del paciente: ${userNotes}` : "") },
               {
                 inline_data: {
                   mime_type: "image/jpeg",
@@ -235,7 +254,10 @@ export async function analyzeImage(
           { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
           { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
           { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-        ]
+        ],
+        generationConfig: {
+          response_mime_type: "application/json",
+        }
       })
     });
 
@@ -294,12 +316,19 @@ export async function analyzeImage(
       throw new Error('INVALID_RESPONSE');
     }
 
-    // Parsear el JSON de la respuesta (puede venir con markdown code blocks)
-    let jsonText = text.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+    // Parsear el JSON de la respuesta (usando regex para mayor robustez)
+    let jsonText = "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    } else {
+      console.error('[AnalysisService] No JSON found in response text:', text);
+      throw new Error('INVALID_RESPONSE');
+    }
 
     // Verificar si el texto parece ser una negativa en lugar de un JSON
     const refusalPhrases = ['no puedo', 'políticas', 'seguridad', 'disculpas', 'I cannot', 'I am sorry', 'safety policies'];
-    if (!jsonText.startsWith('{') && refusalPhrases.some(phrase => jsonText.toLowerCase().includes(phrase))) {
+    if (refusalPhrases.some(phrase => text.toLowerCase().includes(phrase)) && !jsonText) {
       console.warn('[AnalysisService] AI refusal detected in text content');
       throw new Error('SAFETY_BLOCK');
     }
@@ -308,18 +337,16 @@ export async function analyzeImage(
     try {
       parsedResult = JSON.parse(jsonText);
     } catch (jsonError: any) {
-      console.error('[AnalysisService] JSON parse error. Text received:', text.substring(0, 200));
-      // Si el parseo falla y el tipo de escaneo es íntimo, es muy probable que sea un bloqueo de seguridad implícito
-      if (scanType === 'intimate' || scanType === 'pediatrics') {
-        throw new Error('SAFETY_BLOCK');
-      }
+      console.error('[AnalysisService] JSON parse error. Extracted JSON text:', jsonText);
+      console.error('[AnalysisService] Full text received:', text);
       throw new Error('INVALID_RESPONSE');
     }
 
-    // Validar con el schema
+    // Validar con el esquema correspondiente
     let validatedResult;
     try {
-      validatedResult = analysisSchema.parse(parsedResult);
+      const activeSchema = scanType === 'medication' ? medicationSchema : analysisSchema;
+      validatedResult = activeSchema.parse(parsedResult);
     } catch (validationError: any) {
       console.error('[AnalysisService] Validation error:', validationError);
       console.error('[AnalysisService] Parsed result:', JSON.stringify(parsedResult, null, 2));

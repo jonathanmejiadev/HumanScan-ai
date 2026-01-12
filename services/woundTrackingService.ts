@@ -22,13 +22,14 @@ Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones 
 
 El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional. Si observas signos de infección grave, busca atención médica inmediata."
 
-IMPORTANTE: Responde ÚNICAMENTE con un JSON válido que siga exactamente esta estructura:
+IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido. Está terminantemente prohibido incluir introducciones, explicaciones previas, comentarios o bloques de código markdown. 
+Responde ÚNICAMENTE con un JSON que cumpla estrictamente este esquema:
 {
   "descripcion_tecnica": "string",
   "hallazgos_principales": ["string"],
   "triaje_riesgo": "Bajo" | "Medio" | "Alto" | "Emergencia",
   "analisis_abcde_detalle": "string",
-  "especialista_recomendado": "Médico General" | "Cirujano",
+  "especialista_recomendado": "Dermatólogo" | "Oftalmólogo" | "Médico General" | "Odontólogo" | "Fisioterapeuta" | "Traumatólogo" | "Cirujano" | "Pediatra" | "Urólogo" | "Ginecólogo",
   "guia_de_consulta": ["string", "string", "string"],
   "pasos_a_seguir": "string",
   "aviso_legal": "string"
