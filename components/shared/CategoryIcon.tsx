@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideProps, Camera, Eye, Smile, User, Hand, Activity, Scan, Baby, ShieldAlert, Bug, Pill, MessageSquare } from 'lucide-react-native';
+import { LucideProps, Camera, Eye, Smile, User, Hand, Activity, Scan, Baby, ShieldAlert, Bug, Pill, MessageSquare, Apple, FileText } from 'lucide-react-native';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
 
@@ -16,6 +16,8 @@ const iconMap: Record<string, any> = {
     bug: Bug,
     pill: Pill,
     'message-square': MessageSquare,
+    apple: Apple,
+    'file-text': FileText,
 };
 
 interface CategoryIconProps extends LucideProps {

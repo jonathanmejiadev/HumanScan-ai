@@ -93,9 +93,9 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.scanType === 'medication' ? 'Medicamento' : `Análisis ${moduleInfo.name}`}
+            {item.scanType === 'medication' ? 'Medicamento' : item.scanType === 'nutrition' ? 'Alimento' : item.scanType === 'lab_results' ? 'Estudios' : `Análisis ${moduleInfo.name}`}
           </Text>
-          {item.scanType !== 'medication' && (
+          {item.scanType !== 'medication' && item.scanType !== 'nutrition' && item.scanType !== 'lab_results' && (
             <View style={[styles.riskBadge, { backgroundColor: getRiskBgColor((item as any).triaje_riesgo) }]}>
               <Text style={[styles.riskText, { color: getRiskColor((item as any).triaje_riesgo) }]}>
                 {(item as any).triaje_riesgo}
@@ -107,7 +107,11 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
         <Text style={styles.findingsText} numberOfLines={2}>
           {item.scanType === 'medication'
             ? `${(item as any).nombre_detectado} - ${(item as any).concentracion}`
-            : (item as any).hallazgos_principales?.slice(0, 2).join(', ') || ''}
+            : item.scanType === 'nutrition'
+              ? `${(item as any).nombre_plato} - ${(item as any).calorias_aprox}`
+              : item.scanType === 'lab_results'
+                ? `${(item as any).tipo_estudio} - ${(item as any).fecha_detectada || 'Reciente'}`
+                : (item as any).hallazgos_principales?.slice(0, 2).join(', ') || ''}
         </Text>
 
         <View style={styles.cardFooter}>

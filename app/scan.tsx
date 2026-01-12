@@ -16,7 +16,9 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw, ShieldAlert, MessageSquare } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw, ShieldAlert, MessageSquare, FileText } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation } from '@tanstack/react-query';
 import Colors from '@/constants/colors';
@@ -35,17 +37,20 @@ const SPECIALTY_TIPS: Record<string, string> = {
   nails: "Ej: La mancha apareció tras un golpe...",
   wound: "Ej: La herida tiene 3 días y está supurando...",
   ocular: "Ej: Siento como si tuviera arena en el ojo...",
+  lab_results: "Ej: Ayuno de 12 horas, medicación previa...",
   default: "Añade cualquier detalle que consideres importante..."
 };
 
 export default function ScanScreen() {
-  const { type, imageUri: paramUri, imageBase64: paramBase64 } = useLocalSearchParams<{
+  const { type, imageUri: paramUri, imageBase64: paramBase64, mimeType: paramMime } = useLocalSearchParams<{
     type: ScanType,
     imageUri?: string,
-    imageBase64?: string
+    imageBase64?: string,
+    mimeType?: string
   }>();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [mimeType, setMimeType] = useState<string>("image/jpeg");
   const [userNotes, setUserNotes] = useState("");
   const { addToHistory } = useScanHistory();
 
@@ -56,8 +61,8 @@ export default function ScanScreen() {
     mutationFn: async (overrideBase64?: string) => {
       const base64ToUse = overrideBase64 || imageBase64;
       if (!base64ToUse) throw new Error('No image selected');
-      console.log('[ScanScreen] Starting analysis with notes:', userNotes);
-      return analyzeImage(base64ToUse, scanType, userNotes);
+      console.log('[ScanScreen] Starting analysis with notes:', userNotes, 'Mime:', mimeType);
+      return analyzeImage(base64ToUse, scanType, userNotes, mimeType);
     },
     onSuccess: async (result) => {
       console.log('[ScanScreen] Analysis successful:', result);
@@ -93,14 +98,15 @@ export default function ScanScreen() {
   // Manejar imagen recibida por parámetros (Skip camera flow)
   useEffect(() => {
     if (paramUri && paramBase64) {
-      console.log('[ScanScreen] Imagen recibida desde el Escáner Universal');
+      console.log('[ScanScreen] Archivo recibido desde el exterior context:', paramMime || 'image/jpeg');
       setImageUri(paramUri);
       setImageBase64(paramBase64);
+      if (paramMime) setMimeType(paramMime);
 
       // Disparar análisis automático
       analysisMutation.mutate(paramBase64);
     }
-  }, [paramUri, paramBase64]);
+  }, [paramUri, paramBase64, paramMime]);
 
   const pickImage = async (useCamera: boolean) => {
     try {
@@ -145,9 +151,34 @@ export default function ScanScreen() {
     }
   };
 
+  const pickDocument = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        console.log('[ScanScreen] Document selected');
+        const fileUri = result.assets[0].uri;
+        const base64 = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: 'base64',
+        });
+
+        setImageUri(fileUri);
+        setImageBase64(base64);
+        setMimeType('application/pdf');
+      }
+    } catch (error) {
+      console.error('[ScanScreen] Error picking document:', error);
+      Alert.alert('Error', 'No se pudo obtener el documento. Intenta de nuevo.');
+    }
+  };
+
   const resetImage = () => {
     setImageUri(null);
     setImageBase64(null);
+    setMimeType('image/jpeg');
     setUserNotes("");
   };
 
@@ -293,6 +324,20 @@ export default function ScanScreen() {
               <Text style={styles.captureButtonTitle}>Galería</Text>
               <Text style={styles.captureButtonSubtitle}>Seleccionar imagen</Text>
             </TouchableOpacity>
+
+            {scanType === 'lab_results' && (
+              <TouchableOpacity
+                style={styles.captureButton}
+                onPress={pickDocument}
+                activeOpacity={0.8}
+              >
+                <View style={styles.captureIconContainer}>
+                  <FileText color={Colors.primary} size={32} />
+                </View>
+                <Text style={styles.captureButtonTitle}>Subir PDF</Text>
+                <Text style={styles.captureButtonSubtitle}>Seleccionar archivo</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 

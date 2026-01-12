@@ -183,6 +183,32 @@ export const MODULES: Record<ScanType, ModuleConfig> = {
         badges: ['Fórmula', 'Dosis', 'Uso'],
         specialist: 'Farmacéutico',
         instructions: 'Apunta a la caja o etiqueta para leer el nombre y componentes del medicamento'
+    },
+    nutrition: {
+        id: 'nutrition',
+        name: 'Nutrición',
+        description: 'Análisis de calorías, macronutrientes y calidad de alimentos.',
+        icon: 'apple',
+        color: '#FFF7ED',
+        accentColor: '#F59E0B',
+        gradientColors: ['#FFEDD5', '#FFFFFF'], // Naranja 100 -> Blanco
+        overlayType: 'rectangle',
+        badges: ['Calorías', 'Macros', 'Salud'],
+        specialist: 'Médico General',
+        instructions: 'Centra el plato o alimento en el marco para un análisis nutricional preciso'
+    },
+    lab_results: {
+        id: 'lab_results',
+        name: 'Estudios Clínicos',
+        description: 'Interpretación de análisis de laboratorio y documentos médicos.',
+        icon: 'file-text',
+        color: '#F0F9FF',
+        accentColor: '#3B82F6',
+        gradientColors: ['#E0F2FE', '#FFFFFF'], // Cyan 100 -> Blanco
+        overlayType: 'rectangle',
+        badges: ['Lab', 'Bioquímica', 'PDF'],
+        specialist: 'Médico General',
+        instructions: 'Sube un PDF o toma una foto clara de tus resultados para interpretarlos'
     }
 };
 

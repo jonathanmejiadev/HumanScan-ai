@@ -23,6 +23,14 @@ import {
   ChevronDown,
   ChevronUp,
   Pill,
+  Apple,
+  Utensils,
+  Flame,
+  Zap,
+  FileText,
+  Calendar,
+  Beaker,
+  Activity,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
@@ -108,6 +116,16 @@ export default function ResultScreen() {
         const med = result as any;
         await Share.share({
           message: `Identificación de Medicamento - HumanScan\n\nNombre: ${med.nombre_detectado}\nConcentración: ${med.concentracion}\nUso: ${med.para_que_sirve}\n\n${med.aviso_legal}`,
+        });
+      } else if (result.scanType === 'nutrition') {
+        const nut = result as any;
+        await Share.share({
+          message: `Análisis Nutricional - HumanScan\n\nPlato: ${nut.nombre_plato}\nCalorías: ${nut.calorias_aprox}\nResultado: ${nut.semaforo_salud}\n\nConsejo: ${nut.consejo_nutricional}`,
+        });
+      } else if (result.scanType === 'lab_results') {
+        const lab = result as any;
+        await Share.share({
+          message: `Análisis de Laboratorio - HumanScan\n\nEstudio: ${lab.tipo_estudio}\nFecha: ${lab.fecha_detectada || 'No detectada'}\n\nResumen: ${lab.resumen_medico}\n\n${lab.aviso_legal}`,
         });
       } else {
         const res = result as any;
@@ -243,6 +261,131 @@ export default function ResultScreen() {
               ))}
             </CollapsibleSection>
           </>
+        ) : result.scanType === 'nutrition' ? (
+          <>
+            <View style={[
+              styles.riskCard,
+              { backgroundColor: (result as any).semaforo_salud === 'Verde' ? '#D1FAE5' : (result as any).semaforo_salud === 'Amarillo' ? '#FEF3C7' : '#FEE2E2' }
+            ]}>
+              <View style={styles.riskHeader}>
+                <Text style={styles.riskLabel}>Semáforo nutricional</Text>
+                <View style={[styles.riskBadge, {
+                  backgroundColor: (result as any).semaforo_salud === 'Verde' ? Colors.riskLow : (result as any).semaforo_salud === 'Amarillo' ? Colors.riskMedium : Colors.riskHigh
+                }]}>
+                  <Text style={styles.riskBadgeText}>{(result as any).semaforo_salud}</Text>
+                </View>
+              </View>
+              <Text style={[styles.riskMessage, {
+                color: (result as any).semaforo_salud === 'Verde' ? Colors.riskLow : (result as any).semaforo_salud === 'Amarillo' ? Colors.riskMedium : Colors.riskHigh
+              }]}>
+                {(result as any).nombre_plato}
+              </Text>
+            </View>
+
+            <CollapsibleSection
+              title="Valores Estimados"
+              icon={<Flame color={Colors.primary} size={20} />}
+            >
+              <View style={styles.medicationRow}>
+                <Text style={styles.medicationLabel}>Calorías:</Text>
+                <Text style={styles.medicationValue}>{(result as any).calorias_aprox}</Text>
+              </View>
+              <View style={styles.macroGrid}>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroLabel}>Prot</Text>
+                  <Text style={styles.macroValue}>{(result as any).macronutrientes.proteinas}</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroLabel}>Carbs</Text>
+                  <Text style={styles.macroValue}>{(result as any).macronutrientes.carbos}</Text>
+                </View>
+                <View style={styles.macroItem}>
+                  <Text style={styles.macroLabel}>Grasas</Text>
+                  <Text style={styles.macroValue}>{(result as any).macronutrientes.grasas}</Text>
+                </View>
+              </View>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Análisis del Plato"
+              icon={<ClipboardList color={Colors.info} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).analisis_breve}</Text>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Consejo Nutricional"
+              icon={<Zap color={Colors.secondary} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).consejo_nutricional}</Text>
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Alertas & Advertencias"
+              icon={<AlertTriangle color={Colors.warning} size={20} />}
+            >
+              {(result as any).advertencias.map((item: string, index: number) => (
+                <View key={index} style={styles.findingItem}>
+                  <View style={[styles.findingBullet, { backgroundColor: Colors.warning }]} />
+                  <Text style={styles.findingText}>{item}</Text>
+                </View>
+              ))}
+            </CollapsibleSection>
+          </>
+        ) : result.scanType === 'lab_results' ? (
+          <>
+            <View style={styles.labHeaderCard}>
+              <View style={styles.labHeaderRow}>
+                <FileText color={Colors.primary} size={24} />
+                <View style={styles.labHeaderInfo}>
+                  <Text style={styles.labTypeTitle}>{(result as any).tipo_estudio}</Text>
+                  <View style={styles.labDateRow}>
+                    <Calendar size={14} color={Colors.textMuted} />
+                    <Text style={styles.labDateText}>{(result as any).fecha_detectada || 'Fecha no detectada'}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <CollapsibleSection
+              title="Resultados del Laboratorio"
+              icon={<Beaker color={Colors.secondary} size={20} />}
+            >
+              {(result as any).hallazgos.map((item: any, index: number) => {
+                const statusColor =
+                  item.estado === 'NORMAL' ? Colors.riskLow :
+                    (item.estado === 'ALTO' || item.estado === 'BAJO') ? Colors.riskMedium :
+                      item.estado === 'CRITICO' ? Colors.riskHigh : Colors.textMuted;
+
+                return (
+                  <View key={index} style={styles.labResultItem}>
+                    <View style={styles.labResultMain}>
+                      <View style={styles.labResultIndicator}>
+                        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+                        <Text style={styles.paramName}>{item.parametro}</Text>
+                      </View>
+                      <Text style={[styles.paramValue, { color: statusColor }]}>
+                        {item.valor} <Text style={styles.unitText}>{item.unidad}</Text>
+                      </Text>
+                    </View>
+                    <Text style={styles.refRange}>Ref: {item.rango_ref}</Text>
+                    {item.explicacion && item.estado !== 'NORMAL' && (
+                      <View style={styles.explanationBox}>
+                        <Text style={styles.explanationText}>{item.explicacion}</Text>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Resumen Médico"
+              icon={<Activity color={Colors.info} size={20} />}
+            >
+              <Text style={styles.descriptionText}>{(result as any).resumen_medico}</Text>
+            </CollapsibleSection>
+          </>
         ) : (
           <>
             <LinearGradient
@@ -338,7 +481,7 @@ export default function ResultScreen() {
             <Shield color={Colors.warning} size={24} />
           </View>
           <Text style={styles.disclaimerTitle}>Aviso Legal Importante</Text>
-          <Text style={styles.disclaimerText}>{result.aviso_legal}</Text>
+          <Text style={styles.disclaimerText}>{result.aviso_legal || 'ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO.'}</Text>
         </View>
       </ScrollView>
 
@@ -546,6 +689,92 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 20,
   },
+  labHeaderCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  labHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  labHeaderInfo: {
+    flex: 1,
+  },
+  labTypeTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  labDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  labDateText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+  },
+  labResultItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  labResultMain: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  labResultIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  paramName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  paramValue: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  unitText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: Colors.textMuted,
+  },
+  refRange: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    marginLeft: 16,
+  },
+  explanationBox: {
+    marginTop: 8,
+    marginLeft: 16,
+    padding: 10,
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.info,
+  },
+  explanationText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontStyle: 'italic',
+  },
   disclaimerSection: {
     backgroundColor: Colors.warningBg,
     borderRadius: 16,
@@ -642,5 +871,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     flex: 1,
+  },
+  macroGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 8,
+  },
+  macroItem: {
+    flex: 1,
+    backgroundColor: Colors.surfaceAlt,
+    padding: 10,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  macroLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  macroValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.text,
   },
 });

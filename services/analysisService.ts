@@ -25,6 +25,37 @@ const medicationSchema = z.object({
   aviso_legal: z.string().describe('Texto fijo: "La automedicación es peligrosa. Consulte siempre a su médico."'),
 });
 
+const nutritionSchema = z.object({
+  nombre_plato: z.string().describe('Nombre del plato o alimento identificado.'),
+  calorias_aprox: z.string().describe('Estimación de calorías (Ej: "350-400 kcal").'),
+  semaforo_salud: z.enum(['Verde', 'Amarillo', 'Rojo']).describe('Clasificación general de cuán saludable es.'),
+  macronutrientes: z.object({
+    proteinas: z.string().describe('Ej: "Alto" o "20g aprox"'),
+    carbos: z.string().describe('Ej: "Medio" o "40g aprox"'),
+    grasas: z.string().describe('Ej: "Bajo" o "10g aprox"')
+  }),
+  analisis_breve: z.string().describe('Evaluación corta: "¿Es sano? ¿Por qué?".'),
+  consejo_nutricional: z.string().describe('Un tip rápido (Ej: "Acompaña con agua", "Controla la porción").'),
+  advertencias: z.array(z.string()).describe('Lista de alertas (Ej: "Alto en azúcar", "Contiene gluten", "Ultraprocesado").'),
+  aviso_legal: z.string().describe('Texto fijo: "Las estimaciones nutricionales son orientativas. Consulte a un nutricionista profesional."'),
+});
+
+const labSchema = z.object({
+  es_analisis_medico: z.boolean().describe('True solo si el documento parece un análisis de laboratorio.'),
+  fecha_detectada: z.string().optional().describe('Fecha del estudio (DD/MM/AAAA).'),
+  tipo_estudio: z.string().describe('Ej: Hemograma, Hepatograma, Orina.'),
+  hallazgos: z.array(z.object({
+    parametro: z.string().describe('Nombre del indicador (Ej: Colesterol Total).'),
+    valor: z.string().describe('El resultado numérico detectado.'),
+    unidad: z.string().describe('Unidad (Ej: mg/dL).'),
+    rango_ref: z.string().describe('Rango de referencia visible.'),
+    estado: z.enum(['NORMAL', 'ALTO', 'BAJO', 'CRITICO', 'DESCONOCIDO']).describe('Evaluación según el rango.'),
+    explicacion: z.string().optional().describe('Breve explicación SOLO si está fuera de rango.')
+  })).describe('Lista completa de indicadores detectados.'),
+  resumen_medico: z.string().describe('Interpretación global clara y profesional.'),
+  aviso_legal: z.string().describe('Texto obligatorio: "Consulta a tu médico para un diagnóstico definitivo."')
+});
+
 const JSON_FORMAT_INSTRUCTION = `
 IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido. Está terminantemente prohibido incluir introducciones, explicaciones previas, comentarios o bloques de código markdown. 
 Responde ÚNICAMENTE con un JSON que cumpla estrictamente este esquema:
@@ -165,10 +196,68 @@ IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esqu
   "aviso_legal": "La automedicación es peligrosa. Consulte siempre a su médico."
 }`;
 
+const NUTRITION_ANALYSIS_PROMPT = `Actúas como un Nutricionista experto. Tu misión es analizar la foto de la comida proporcionada, identificando los alimentos, estimando sus porciones y evaluando su calidad nutricional.
+
+Instrucciones:
+1. Identifica el nombre del plato o los alimentos principales visibles.
+2. Estima las calorías aproximadas basándote en lo observado.
+3. Clasifica la salud general del plato usando el sistema de semáforo (Verde, Amarillo, Rojo).
+4. Analiza los macronutrientes (proteínas, carbohidratos, grasas).
+5. Proporciona un breve análisis de por qué es saludable o no.
+6. Da un consejo nutricional práctico.
+7. Lista cualquier advertencia relevante (ultraprocesados, exceso de sodio, azúcares, alérgenos comunes).
+
+Si la foto NO es de comida o no contiene alimentos identificables, indica en "nombre_plato" que no se detectan alimentos y deja el resto de campos con valores coherentes (Ej: "N/A").
+
+IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esquema:
+{
+  "nombre_plato": "string",
+  "calorias_aprox": "string",
+  "semaforo_salud": "Verde" | "Amarillo" | "Rojo",
+  "macronutrientes": {
+    "proteinas": "string",
+    "carbos": "string",
+    "grasas": "string"
+  },
+  "analisis_breve": "string",
+  "consejo_nutricional": "string",
+  "advertencias": ["string"],
+  "aviso_legal": "Las estimaciones nutricionales son orientativas. Consulte a un nutricionista profesional."
+}`;
+
+const LAB_ANALYSIS_PROMPT = `Actúas como un Bioquímico Clínico Experto. Tu misión es analizar imágenes o PDFs de estudios médicos de laboratorio.
+Extrae los valores con precisión total, compáralos con los rangos de referencia proporcionados en el documento y explica brevemente cualquier desviación.
+
+Instrucciones:
+1. Identifica de qué tipo de estudio se trata y la fecha.
+2. Extrae CADA parámetro medido, su valor, unidad, rango de referencia y determina su estado (NORMAL, ALTO, BAJO o CRITICO).
+3. Si un valor está fuera de rango, explica brevemente qué significa en términos sencillos.
+4. Genera un resumen médico global que ayude al paciente a entender su estado general de salud basado en estos resultados.
+
+IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esquema:
+{
+  "es_analisis_medico": boolean,
+  "fecha_detectada": "string",
+  "tipo_estudio": "string",
+  "hallazgos": [
+    {
+      "parametro": "string",
+      "valor": "string",
+      "unidad": "string",
+      "rango_ref": "string",
+      "estado": "NORMAL" | "ALTO" | "BAJO" | "CRITICO" | "DESCONOCIDO",
+      "explicacion": "string (opcional)"
+    }
+  ],
+  "resumen_medico": "string",
+  "aviso_legal": "Consulta a tu médico para un diagnóstico definitivo."
+}`;
+
 export async function analyzeImage(
   imageBase64: string,
   scanType: ScanType,
-  userNotes: string = ""
+  userNotes: string = "",
+  mimeType: string = "image/jpeg"
 ): Promise<Omit<AnalysisResult, 'id' | 'timestamp' | 'scanType' | 'imageUri'>> {
   let prompt: string;
 
@@ -212,6 +301,12 @@ export async function analyzeImage(
     case 'medication':
       prompt = MEDICATION_ANALYSIS_PROMPT;
       break;
+    case 'nutrition':
+      prompt = NUTRITION_ANALYSIS_PROMPT;
+      break;
+    case 'lab_results':
+      prompt = LAB_ANALYSIS_PROMPT;
+      break;
     default:
       prompt = SKIN_ANALYSIS_PROMPT;
   }
@@ -248,7 +343,7 @@ export async function analyzeImage(
               { text: finalPrompt },
               {
                 inline_data: {
-                  mime_type: "image/jpeg",
+                  mime_type: mimeType,
                   data: cleanBase64
                 }
               }
@@ -351,9 +446,19 @@ export async function analyzeImage(
     }
 
     // Validar con el esquema correspondiente
+    // Validar con el esquema correspondiente
     let validatedResult;
     try {
-      const activeSchema = scanType === 'medication' ? medicationSchema : analysisSchema;
+      let activeSchema;
+      if (scanType === 'medication') {
+        activeSchema = medicationSchema;
+      } else if (scanType === 'nutrition') {
+        activeSchema = nutritionSchema;
+      } else if (scanType === 'lab_results') {
+        activeSchema = labSchema;
+      } else {
+        activeSchema = analysisSchema;
+      }
       validatedResult = activeSchema.parse(parsedResult);
     } catch (validationError: any) {
       console.error('[AnalysisService] Validation error:', validationError);

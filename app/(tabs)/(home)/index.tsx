@@ -4,6 +4,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WelcomeHeader from '@/components/home/WelcomeHeader';
@@ -12,7 +13,12 @@ import QuickScanGrid from '@/components/home/QuickScanGrid';
 import MedicalDisclaimer from '@/components/home/MedicalDisclaimer';
 import PhotoGuideModal from '@/components/home/PhotoGuideModal';
 import MedicationScannerBanner from '@/components/home/MedicationScannerBanner';
+import NutritionScannerBanner from '@/components/home/NutritionScannerBanner';
+import LabScannerBanner from '@/components/home/LabScannerBanner';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
 import { ScanType } from '@/types/analysis';
 import { Bot } from 'lucide-react-native';
 
@@ -50,6 +56,10 @@ export default function HomeScreen() {
     router.push('/chat');
   };
 
+  const handleLabScan = () => {
+    router.push({ pathname: '/scan', params: { type: 'lab_results' } });
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <ScrollView
@@ -63,6 +73,14 @@ export default function HomeScreen() {
 
         <MedicationScannerBanner
           onPress={() => router.push({ pathname: '/scan', params: { type: 'medication' } })}
+        />
+
+        <NutritionScannerBanner
+          onPress={() => router.push({ pathname: '/scan', params: { type: 'nutrition' } })}
+        />
+
+        <LabScannerBanner
+          onPress={handleLabScan}
         />
 
         <QuickScanGrid
