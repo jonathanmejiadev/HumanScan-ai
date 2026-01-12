@@ -30,6 +30,7 @@ import { useScanHistory } from '@/hooks/useScanHistory';
 import { RiskLevel } from '@/types/analysis';
 import LegalDisclaimer from '@/components/shared/LegalDisclaimer';
 import { MODULES } from '@/constants/modules';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 
 const getRiskColor = (risk: RiskLevel) => {
   switch (risk) {
@@ -176,11 +177,11 @@ export default function ResultScreen() {
             <Image source={{ uri: result.imageUri }} style={styles.resultImage} />
           ) : (
             <View style={styles.placeholderImage}>
-              <Scan color={Colors.textMuted} size={48} />
+              <CategoryIcon scanType={result.scanType} color={Colors.textMuted} size={48} />
             </View>
           )}
           <View style={[styles.scanTypeBadge, { backgroundColor: moduleConfig.accentColor }]}>
-            <Scan color={Colors.textInverse} size={14} />
+            <CategoryIcon scanType={result.scanType} color={Colors.textInverse} size={14} />
             <Text style={styles.scanTypeText}>
               {moduleConfig.name}
             </Text>
@@ -281,7 +282,7 @@ export default function ResultScreen() {
             {(result as any).analisis_abcde_detalle !== 'N/A' && (result as any).analisis_abcde_detalle !== 'N/A - Criterio específico para lesiones cutáneas' && (
               <CollapsibleSection
                 title="Análisis ABCDE"
-                icon={<Scan color={Colors.skinScan} size={20} />}
+                icon={<CategoryIcon scanType="skin" color={Colors.skinScan} size={20} />}
                 defaultOpen={false}
               >
                 <Text style={styles.descriptionText}>{(result as any).analisis_abcde_detalle}</Text>

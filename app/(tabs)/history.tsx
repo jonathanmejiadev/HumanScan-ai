@@ -9,12 +9,13 @@ import {
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Clock, Scan, Eye, ChevronRight, Inbox, Trash2, Pill } from 'lucide-react-native';
+import { Clock, ChevronRight, Inbox, Trash2, Pill } from 'lucide-react-native';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import Colors from '@/constants/colors';
 import { AnalysisResult, RiskLevel } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
 import { Alert } from 'react-native';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 
 const getRiskColor = (risk: RiskLevel) => {
   switch (risk) {
@@ -81,18 +82,11 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
           <Image source={{ uri: item.imageUri }} style={styles.thumbnail} />
         ) : (
           <View style={styles.placeholderImage}>
-            {item.scanType === 'skin' ? (
-              <Scan color={Colors.textMuted} size={24} />
-            ) : (
-              <Eye color={Colors.textMuted} size={24} />
-            )}
+            <CategoryIcon scanType={item.scanType} color={Colors.textMuted} size={24} />
           </View>
         )}
         <View style={[styles.typeIndicator, { backgroundColor: moduleInfo.accentColor }]}>
-          {item.scanType === 'skin' && <Scan color={Colors.textInverse} size={12} />}
-          {item.scanType === 'ocular' && <Eye color={Colors.textInverse} size={12} />}
-          {item.scanType === 'medication' && <Pill color={Colors.textInverse} size={12} />}
-          {!['skin', 'ocular', 'medication'].includes(item.scanType) && <Scan color={Colors.textInverse} size={12} />}
+          <CategoryIcon scanType={item.scanType} color={Colors.textInverse} size={12} />
         </View>
       </View>
 

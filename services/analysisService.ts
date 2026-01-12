@@ -45,7 +45,7 @@ Tu misión es analizar la imagen proporcionada y generar un reporte técnico y o
 
 Instrucciones de Análisis Clínico:
 1. Evaluación de Lesiones (ABCDE): Ante manchas o lunares, analiza: Asimetría, Bordes (regulares/irregulares), Color (homogéneo/múltiple), Diámetro y Evolución visual.
-2. Actividad vs. Estabilidad: Si una lesión es asimétrica pero se describe como antigua/estable y no tiene signos de actividad (sangrado, costras nuevas, inflamación perilesional, secreción), clasifica el riesgo como 'Bajo'.
+2. Actividad vs. Estabilidad: Si el contexto del paciente indica que la lesión es antigua o estable, y no observas signos de actividad reciente (sangrado, costras nuevas, inflamación), debes priorizar la estabilidad sobre la asimetría y mantener el riesgo en 'Bajo'.
 3. Identificación de Patrones: Busca signos de inflamación, infecciones fúngicas, reacciones alérgicas cutáneas, acné, dermatitis, psoriasis, u otras anomalías.
 4. Si la imagen no es clara o no muestra piel, indica que no es apta para análisis.
 
@@ -104,8 +104,8 @@ ${JSON_FORMAT_INSTRUCTION}`;
 
 const THROAT_ANALYSIS_PROMPT = `Actúas como un asistente de salud especializado en otorrinolaringología. Analiza la imagen de la garganta buscando:
 1. Diferenciación de Riesgo:
-   - Riesgo Bajo: Irritación simple, enrojecimiento leve sin placas.
-   - Riesgo Alto/Emergencia: Exudado purulento (placas blancas), inflamación severa de amígdalas que dificulte la deglución, o signos compatibles con fiebre alta según descripción.
+   - Riesgo Bajo: Irritación simple, enrojecimiento leve sin placas. Utiliza el contexto del paciente para verificar si refiere fiebre. Si hay enrojecimiento pero el contexto niega fiebre y no observas placas, mantén el riesgo en 'Bajo'.
+   - Riesgo Alto/Emergencia: Exudado purulento (placas blancas), inflamación severa de amígdalas que dificulte la deglución, o signos compatibles con fiebre alta según descripción o contexto.
 2. Estado de amígdalas (inflamación, tamaño, presencia de placas blanquecinas).
 3. Úvula y faringe posterior (coloración, irritación).
 
@@ -127,14 +127,16 @@ const PEDIATRICS_ANALYSIS_PROMPT = `Actúas como pediatra experto en dermatolog�
 
 ${JSON_FORMAT_INSTRUCTION}`;
 
-const INTIMATE_ANALYSIS_PROMPT = `Actúas como un asistente médico profesional y discreto para salud íntima. Analiza la imagen buscando verrugas, llagas o úlceras.
-
+const INTIMATE_ANALYSIS_PROMPT = `Actúas como un asistente médico profesional y discreto para salud íntima. Analiza la zona buscando signos de ITS, verrugas, llagas o úlceras. 
+ 
+Si el contexto menciona que la lesión es persistente o indolora, evalúa pápulas perladas o glándulas sebáceas como hallazgos benignos probables.
+ 
 Lógica de Direccionamiento de Especialista:
 - Si detectas anatomía masculina con lesiones, recomienda 'Urólogo'.
 - Si detectas anatomía femenina con lesiones, recomienda 'Ginecólogo'.
 - Si las lesiones parecen ser puramente dermatológicas (irritación, eccema cutáneo) sin compromiso evidente de órganos reproductivos, recomienda 'Dermatólogo'.
 - En caso de duda sobre la anatomía, recomienda 'Médico General'.
-
+ 
 ${JSON_FORMAT_INSTRUCTION}`;
 
 const BITES_ANALYSIS_PROMPT = `Actúas como experto en toxicología y dermatología. Analiza la imagen de la picadura buscando:
@@ -229,6 +231,10 @@ export async function analyzeImage(
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
+    const finalPrompt = userNotes
+      ? "CONTEXTO DEL PACIENTE (CRÍTICO): " + userNotes + "\n\n" + prompt
+      : prompt;
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -239,7 +245,7 @@ export async function analyzeImage(
           {
             role: "user",
             parts: [
-              { text: prompt + (userNotes ? `\n\nContexto adicional del paciente: ${userNotes}` : "") },
+              { text: finalPrompt },
               {
                 inline_data: {
                   mime_type: "image/jpeg",
@@ -289,6 +295,26 @@ export async function analyzeImage(
       throw new Error('API_ERROR');
     }
 
+    // Validar que existan candidatos y contenido
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
+      console.error('[AnalysisService] Invalid response structure:', JSON.stringify(data, null, 2));
+      throw new Error('INVALID_RESPONSE');
+    }
+
+    const text = data.candidates[0].content.parts[0].text;
+
+    if (!text || typeof text !== 'string') {
+      console.error('[AnalysisService] No text in response');
+      throw new Error('INVALID_RESPONSE');
+    }
+
+    // Parsear el JSON de la respuesta (usando regex para mayor robustez) - EJECUTADO INMEDIATAMENTE
+    let jsonText = "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+
     // Verificar bloqueos de seguridad o contenido de Gemini (Hard block en metadatos)
     const blockReason = data.promptFeedback?.blockReason;
     const finishReason = data.candidates?.[0]?.finishReason;
@@ -303,25 +329,7 @@ export async function analyzeImage(
       throw new Error('SAFETY_BLOCK');
     }
 
-    // Validar que existan candidatos y contenido
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0]) {
-      console.error('[AnalysisService] Invalid response structure:', JSON.stringify(data, null, 2));
-      throw new Error('INVALID_RESPONSE');
-    }
-
-    const text = data.candidates[0].content.parts[0].text;
-
-    if (!text || typeof text !== 'string') {
-      console.error('[AnalysisService] No text in response');
-      throw new Error('INVALID_RESPONSE');
-    }
-
-    // Parsear el JSON de la respuesta (usando regex para mayor robustez)
-    let jsonText = "";
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      jsonText = jsonMatch[0];
-    } else {
+    if (!jsonText) {
       console.error('[AnalysisService] No JSON found in response text:', text);
       throw new Error('INVALID_RESPONSE');
     }

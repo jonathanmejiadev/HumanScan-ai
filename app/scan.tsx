@@ -9,10 +9,14 @@ import {
   Alert,
   Platform,
   ScrollView,
+  TextInput,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw, ShieldAlert } from 'lucide-react-native';
+import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw, ShieldAlert, MessageSquare } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation } from '@tanstack/react-query';
 import Colors from '@/constants/colors';
@@ -22,6 +26,18 @@ import { ScanType, AnalysisResult } from '@/types/analysis';
 
 import { MODULES } from '@/constants/modules';
 
+const SPECIALTY_TIPS: Record<string, string> = {
+  skin: "Ej: Lo tengo hace años, no ha cambiado...",
+  throat: "Ej: Tengo fiebre de 38° y me duele al tragar...",
+  intimate: "Ej: Siento ardor pero no hay dolor fuerte...",
+  medication: "Ej: Me lo recetaron para la presión...",
+  dental: "Ej: Me duele al masticar cosas frías...",
+  nails: "Ej: La mancha apareció tras un golpe...",
+  wound: "Ej: La herida tiene 3 días y está supurando...",
+  ocular: "Ej: Siento como si tuviera arena en el ojo...",
+  default: "Añade cualquier detalle que consideres importante..."
+};
+
 export default function ScanScreen() {
   const { type, imageUri: paramUri, imageBase64: paramBase64 } = useLocalSearchParams<{
     type: ScanType,
@@ -30,6 +46,7 @@ export default function ScanScreen() {
   }>();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [userNotes, setUserNotes] = useState("");
   const { addToHistory } = useScanHistory();
 
   const scanType = (type as ScanType) || 'skin';
@@ -39,19 +56,19 @@ export default function ScanScreen() {
     mutationFn: async (overrideBase64?: string) => {
       const base64ToUse = overrideBase64 || imageBase64;
       if (!base64ToUse) throw new Error('No image selected');
-      console.log('[ScanScreen] Starting analysis...');
-      return analyzeImage(base64ToUse, scanType);
+      console.log('[ScanScreen] Starting analysis with notes:', userNotes);
+      return analyzeImage(base64ToUse, scanType, userNotes);
     },
     onSuccess: async (result) => {
       console.log('[ScanScreen] Analysis successful:', result);
       const id = `scan_${Date.now()}`;
-      const fullResult: AnalysisResult = {
+      const fullResult = {
         id,
         timestamp: Date.now(),
         scanType,
         imageUri: imageUri || '',
         ...result,
-      };
+      } as any;
       await addToHistory(fullResult);
       router.replace({ pathname: '/result', params: { id } });
     },
@@ -131,6 +148,7 @@ export default function ScanScreen() {
   const resetImage = () => {
     setImageUri(null);
     setImageBase64(null);
+    setUserNotes("");
   };
 
   const handleAnalyze = () => {
@@ -219,12 +237,37 @@ export default function ScanScreen() {
         )}
 
         {imageUri ? (
-          <View style={styles.previewContainer}>
-            <Image source={{ uri: imageUri }} style={styles.previewImage} />
-            <TouchableOpacity style={styles.resetButton} onPress={resetImage}>
-              <RotateCcw color={Colors.textInverse} size={20} />
-            </TouchableOpacity>
-          </View>
+          <>
+            <View style={styles.previewContainer}>
+              <Image source={{ uri: imageUri }} style={styles.previewImage} />
+              <TouchableOpacity style={styles.resetButton} onPress={resetImage}>
+                <RotateCcw color={Colors.textInverse} size={20} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.notesContainer}>
+              <View style={styles.notesHeader}>
+                <MessageSquare size={18} color={Colors.primary} />
+                <Text style={styles.notesTitle}>Ayuda a la IA con más contexto</Text>
+              </View>
+              <TextInput
+                style={styles.notesInput}
+                placeholder={SPECIALTY_TIPS[scanType] || SPECIALTY_TIPS.default}
+                placeholderTextColor={Colors.textMuted}
+                multiline
+                numberOfLines={3}
+                value={userNotes}
+                onChangeText={setUserNotes}
+                blurOnSubmit={true}
+                returnKeyType="done"
+              />
+              {userNotes.length > 0 && (
+                <Text style={styles.notesIndicator}>
+                  <CheckCircle size={10} color={Colors.secondary} /> Se enviará con tu análisis
+                </Text>
+              )}
+            </View>
+          </>
         ) : (
           <View style={styles.captureSection}>
             <TouchableOpacity
@@ -278,26 +321,31 @@ export default function ScanScreen() {
       </ScrollView>
 
       {imageUri && (
-        <View style={styles.bottomActions}>
-          <TouchableOpacity
-            style={[styles.analyzeButton, analysisMutation.isPending && styles.analyzeButtonDisabled]}
-            onPress={handleAnalyze}
-            disabled={analysisMutation.isPending}
-            activeOpacity={0.8}
-          >
-            {analysisMutation.isPending ? (
-              <>
-                <ActivityIndicator color={Colors.textInverse} size="small" />
-                <Text style={styles.analyzeButtonText}>Analizando...</Text>
-              </>
-            ) : (
-              <>
-                <Scan color={Colors.textInverse} size={20} />
-                <Text style={styles.analyzeButtonText}>Iniciar Análisis</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+        >
+          <View style={styles.bottomActions}>
+            <TouchableOpacity
+              style={[styles.analyzeButton, analysisMutation.isPending && styles.analyzeButtonDisabled]}
+              onPress={handleAnalyze}
+              disabled={analysisMutation.isPending}
+              activeOpacity={0.8}
+            >
+              {analysisMutation.isPending ? (
+                <>
+                  <ActivityIndicator color={Colors.textInverse} size="small" />
+                  <Text style={styles.analyzeButtonText}>Analizando...</Text>
+                </>
+              ) : (
+                <>
+                  <Scan color={Colors.textInverse} size={20} />
+                  <Text style={styles.analyzeButtonText}>Iniciar Análisis</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
       )}
     </View>
   );
@@ -524,5 +572,45 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  notesContainer: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  notesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  notesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  notesInput: {
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 14,
+    color: Colors.text,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  notesIndicator: {
+    fontSize: 11,
+    color: Colors.secondary,
+    marginTop: 8,
+    fontWeight: '600',
+    textAlign: 'right',
   },
 });

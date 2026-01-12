@@ -2,8 +2,9 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
-import { Camera, HelpCircle, Eye, Smile, User, Hand, Activity, ChevronRight, Scan, Baby, ShieldAlert, Bug, Pill } from 'lucide-react-native';
+import { Camera, HelpCircle, ChevronRight, Scan } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import CategoryIcon from './CategoryIcon';
 
 interface ModuleCardProps {
     scanType: ScanType;
@@ -12,23 +13,10 @@ interface ModuleCardProps {
     fullDescription?: boolean; // Prop to show full description without truncation
 }
 
-const iconMap: Record<string, any> = {
-    camera: Camera,
-    eye: Eye,
-    smile: Smile,
-    user: User,
-    hand: Hand,
-    activity: Activity,
-    scan: Scan,
-    baby: Baby,
-    'shield-alert': ShieldAlert,
-    bug: Bug,
-    pill: Pill,
-};
+
 
 export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescription = false }: ModuleCardProps) {
     const module = MODULES[scanType];
-    const IconComponent = iconMap[module.icon] || Camera;
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
     // Default gradient if not specified
@@ -65,7 +53,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 >
                     {/* Left: Icon */}
                     <View style={[styles.iconContainer, { backgroundColor: module.accentColor }]}>
-                        <IconComponent size={24} color="#FFFFFF" />
+                        <CategoryIcon scanType={scanType} size={24} color="#FFFFFF" />
                     </View>
 
                     {/* Center: Content */}
