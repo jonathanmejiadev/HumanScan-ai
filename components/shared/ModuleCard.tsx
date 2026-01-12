@@ -128,8 +128,10 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     identityBar: {
-        width: 4,
+        width: 6,
         height: '100%',
+        borderTopLeftRadius: 24,
+        borderBottomLeftRadius: 24,
     },
     mainContainer: {
         flexDirection: 'row',
