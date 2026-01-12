@@ -11,7 +11,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
             <LinearGradient
-                colors={['#6366F1', '#8B5CF6']} // Indigo to Violet
+                colors={['#1E40AF', '#7C3AED']} // Deep Cobalt Blue to Electric Violet
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.container}
