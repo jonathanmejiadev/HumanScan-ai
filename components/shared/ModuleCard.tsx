@@ -22,7 +22,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
     // Default gradient if not specified
     const gradientColors = module.gradientColors || ['#FFFFFF', '#FFFFFF'];
 
-    const shadowAnim = useRef(new Animated.Value(0.07)).current;
+    const shadowAnim = useRef(new Animated.Value(0.1)).current;
 
     const handlePressIn = () => {
         Animated.parallel([
@@ -31,7 +31,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.04,
+                toValue: 0.05,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -45,7 +45,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.07,
+                toValue: 0.1,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -62,20 +62,20 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
             elevation: 5,
         }}>
             <TouchableOpacity
-                style={styles.touchableWrapper}
+                style={[styles.touchableWrapper, { borderColor: module.accentColor + '1A' }]}
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={1}
             >
                 <LinearGradient
-                    colors={[module.accentColor + '14', '#FFFFFF']} // 8% opacity (14 hex)
+                    colors={[module.accentColor + '26', '#FFFFFF']} // ~15% opacity to white
                     start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
+                    end={{ x: 1, y: 0.5 }}
                     style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}
                 >
                     {/* Left: Icon */}
-                    <View style={[styles.iconContainer, { borderColor: module.accentColor, backgroundColor: module.accentColor + '0D' }]}>
+                    <View style={[styles.iconContainer, { borderColor: module.accentColor + '20' }]}>
                         <CategoryIcon scanType={scanType} size={22} color={module.accentColor} />
                     </View>
 
@@ -91,7 +91,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
 
                         <View style={styles.badgesContainer}>
                             {module.badges.map((badge, index) => (
-                                <View key={index} style={styles.badge}>
+                                <View key={index} style={[styles.badge, { borderColor: module.accentColor + '33' }]}>
                                     <Text style={styles.badgeText}>
                                         {badge}
                                     </Text>
@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderRadius: 24,
         backgroundColor: '#FFFFFF',
+        borderWidth: 1.5,
         overflow: 'hidden',
     },
     mainContainer: {
@@ -127,10 +128,17 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        borderWidth: 1.5,
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
+        // Small icon shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     contentContainer: {
         flex: 1,
@@ -144,7 +152,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 13,
-        color: '#6B7280',
+        color: '#4B5563', // Intermediate grey
         lineHeight: 18,
         marginBottom: 8,
     },
@@ -154,10 +162,11 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     badge: {
-        backgroundColor: '#F3F4F6', // Soft grey capsule
+        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,
+        borderWidth: 0.5,
     },
     badgeText: {
         fontSize: 10,
