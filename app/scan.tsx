@@ -78,14 +78,14 @@ export default function ScanScreen() {
 
       const result = useCamera
         ? await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: (ImagePicker as any).MediaType.Images,
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.8,
           base64: true,
         })
         : await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          mediaTypes: (ImagePicker as any).MediaType.Images,
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.8,
