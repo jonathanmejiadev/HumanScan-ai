@@ -17,33 +17,28 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
                 style={styles.container}
             >
                 {/* Main Content Area */}
-                <View style={styles.mainContent}>
-                    <View style={styles.textContent}>
-                        <Text style={styles.title}>Análisis Universal IA</Text>
-                        <Text style={styles.description}>
-                            Apunta a cualquier zona y deja que la IA identifique y analice el problema por ti.
-                        </Text>
+                <View style={styles.contentWrapper}>
+                    <View style={styles.mainContent}>
+                        <View style={styles.textContent}>
+                            <Text style={styles.title}>Análisis Universal</Text>
+                            <Text style={styles.description}>
+                                Identifica y analiza cualquier anomalía de salud al instante
+                            </Text>
+                        </View>
                     </View>
-                </View>
 
-                {/* Vertical Spacer for better separation */}
-                <View style={styles.spacer} />
-
-                {/* Bottom Action Area */}
-                <View style={styles.footer}>
-                    <TouchableOpacity
-                        style={styles.startButton}
-                        onPress={onPress}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.startButtonText}>Escanear ahora</Text>
-                        <ChevronRight size={16} color="#FFFFFF" />
-                    </TouchableOpacity>
+                    {/* Bottom Action Area */}
+                    <View style={styles.footer}>
+                        <View style={styles.startButton}>
+                            <Text style={styles.startButtonText}>Escanear ahora</Text>
+                            <ChevronRight size={16} color="#FFFFFF" strokeWidth={3} />
+                        </View>
+                    </View>
                 </View>
 
                 {/* Decorative Elements */}
                 <View style={styles.decorativeIcon}>
-                    <Sparkles size={100} color="rgba(255, 255, 255, 0.1)" strokeWidth={1} />
+                    <Sparkles size={110} color="rgba(255, 255, 255, 0.12)" strokeWidth={1} />
                 </View>
             </LinearGradient>
         </TouchableOpacity>
@@ -56,47 +51,48 @@ const styles = StyleSheet.create({
         marginVertical: 12,
         borderRadius: 24,
         padding: 20,
-        minHeight: 160, // Reduced height by 20%
+        height: 144, // Reduced height (160 * 0.9)
         overflow: 'hidden',
-        justifyContent: 'space-between',
+    },
+    contentWrapper: {
+        flex: 1,
+        justifyContent: 'center', // Center content vertically
+        zIndex: 2,
     },
     mainContent: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        zIndex: 2,
+        marginBottom: 8,
     },
     textContent: {
         flex: 1,
-    },
-    spacer: {
-        height: 20, // Increased spacing
     },
     title: {
         fontSize: 22,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 6,
+        marginBottom: 4,
     },
     description: {
         fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.9)',
-        lineHeight: 20,
+        color: 'rgba(255, 255, 255, 0.95)',
+        lineHeight: 18,
         fontWeight: '500',
     },
     footer: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-start',
         alignItems: 'center',
-        zIndex: 2,
+        marginTop: 4,
     },
     startButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        gap: 4,
+        gap: 6,
     },
     startButtonText: {
         color: '#FFFFFF',
@@ -105,8 +101,8 @@ const styles = StyleSheet.create({
     },
     decorativeIcon: {
         position: 'absolute',
-        right: -30,
-        top: -30,
+        right: -35,
+        top: -20,
         zIndex: 1,
     },
 });
