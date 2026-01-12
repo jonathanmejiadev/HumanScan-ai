@@ -22,7 +22,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
     // Default gradient if not specified
     const gradientColors = module.gradientColors || ['#FFFFFF', '#FFFFFF'];
 
-    const shadowAnim = useRef(new Animated.Value(0.1)).current;
+    const shadowAnim = useRef(new Animated.Value(0.05)).current;
 
     const handlePressIn = () => {
         Animated.parallel([
@@ -31,7 +31,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.05,
+                toValue: 0.03,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -45,7 +45,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 useNativeDriver: true,
             }),
             Animated.timing(shadowAnim, {
-                toValue: 0.1,
+                toValue: 0.05,
                 duration: 100,
                 useNativeDriver: true,
             }),
@@ -59,52 +59,58 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: shadowAnim,
             shadowRadius: 10,
-            elevation: 5,
+            elevation: 3,
         }}>
             <TouchableOpacity
-                style={[styles.touchableWrapper, { borderColor: module.accentColor + '1A' }]}
+                style={[
+                    styles.touchableWrapper,
+                    {
+                        backgroundColor: module.accentColor + '0A', // 4% opacity tint
+                        borderColor: module.accentColor + '26'    // 15% opacity border
+                    }
+                ]}
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
                 activeOpacity={1}
             >
-                <LinearGradient
-                    colors={[module.accentColor + '26', '#FFFFFF']} // ~15% opacity to white
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}
-                >
-                    {/* Left: Icon */}
-                    <View style={[styles.iconContainer, { borderColor: module.accentColor + '20' }]}>
-                        <CategoryIcon scanType={scanType} size={22} color={module.accentColor} />
-                    </View>
+                <View style={styles.identityBarWrapper}>
+                    {/* Left Identity Bar */}
+                    <View style={[styles.identityBar, { backgroundColor: module.accentColor }]} />
 
-                    {/* Center: Content */}
-                    <View style={styles.contentContainer}>
-                        <Text style={styles.title}>{module.name}</Text>
-                        <Text
-                            style={styles.description}
-                            numberOfLines={fullDescription ? undefined : 2}
-                        >
-                            {module.description}
-                        </Text>
+                    <View style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}>
+                        {/* Left: Icon */}
+                        <View style={styles.iconContainer}>
+                            <CategoryIcon scanType={scanType} size={22} color={module.accentColor} />
+                        </View>
 
-                        <View style={styles.badgesContainer}>
-                            {module.badges.map((badge, index) => (
-                                <View key={index} style={[styles.badge, { borderColor: module.accentColor + '33' }]}>
-                                    <Text style={styles.badgeText}>
-                                        {badge}
-                                    </Text>
-                                </View>
-                            ))}
+                        {/* Center: Content */}
+                        <View style={styles.contentContainer}>
+                            <Text style={styles.title}>{module.name}</Text>
+                            <Text
+                                style={styles.description}
+                                numberOfLines={fullDescription ? undefined : 2}
+                            >
+                                {module.description}
+                            </Text>
+
+                            <View style={styles.badgesContainer}>
+                                {module.badges.map((badge, index) => (
+                                    <View key={index} style={[styles.badge, { borderColor: module.accentColor + '40' }]}>
+                                        <Text style={[styles.badgeText, { color: module.accentColor }]}>
+                                            {badge}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+
+                        {/* Right: Chevron */}
+                        <View style={styles.arrowContainer}>
+                            <ChevronRight size={20} color="#9CA3AF" />
                         </View>
                     </View>
-
-                    {/* Right: Chevron */}
-                    <View style={styles.arrowContainer}>
-                        <ChevronRight size={20} color="#9CA3AF" />
-                    </View>
-                </LinearGradient>
+                </View>
             </TouchableOpacity>
         </Animated.View>
     );
@@ -114,9 +120,16 @@ const styles = StyleSheet.create({
     touchableWrapper: {
         marginBottom: 16,
         borderRadius: 24,
-        backgroundColor: '#FFFFFF',
-        borderWidth: 1.5,
+        borderWidth: 1,
         overflow: 'hidden',
+    },
+    identityBarWrapper: {
+        flexDirection: 'row',
+        flex: 1,
+    },
+    identityBar: {
+        width: 4,
+        height: '100%',
     },
     mainContainer: {
         flexDirection: 'row',
@@ -129,14 +142,13 @@ const styles = StyleSheet.create({
         height: 48,
         borderRadius: 24,
         backgroundColor: '#FFFFFF',
-        borderWidth: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 16,
-        // Small icon shadow
+        // Subtle icon shadow
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
     },
@@ -162,7 +174,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     badge: {
-        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
+        backgroundColor: '#FFFFFF', // Solid white
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,
@@ -171,7 +183,6 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 10,
         fontWeight: '700',
-        color: '#4B5563',
     },
     arrowContainer: {
         justifyContent: 'center',
