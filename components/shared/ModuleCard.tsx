@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     badge: {
-        backgroundColor: '#FFFFFF', // Solid white
+        backgroundColor: '#EEF2FF', // Indigo PrimaryLight
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 20,

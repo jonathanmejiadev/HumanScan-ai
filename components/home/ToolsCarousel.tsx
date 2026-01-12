@@ -130,7 +130,7 @@ export default function ToolsCarousel({ onToolPress }: ToolsCarouselProps) {
                     title="Análisis"
                     subtitle="Interpreta lab. y PDFs"
                     icon={<FileText />}
-                    color="#0A7AFF"
+                    color="#6366F1" // New Indigo Brand
                     onPress={() => onToolPress('lab_results')}
                 />
             </ScrollView>

@@ -1,22 +1,22 @@
 const Colors = {
-  primary: '#0891B2',
-  primaryDark: '#0E7490',
-  primaryLight: '#22D3EE',
-  secondary: '#059669',
-  secondaryLight: '#10B981',
-  
-  background: '#F8FAFC',
+  primary: '#6366F1', // New Indigo Brand Color
+  primaryDark: '#4F46E5',
+  primaryLight: '#EEF2FF', // Soft Indigo background
+  secondary: '#8B5CF6',
+  secondaryLight: '#DDD6FE',
+
+  background: '#F9FAFB',
   surface: '#FFFFFF',
-  surfaceAlt: '#F1F5F9',
-  
-  text: '#0F172A',
-  textSecondary: '#475569',
+  surfaceAlt: '#F3F4F6',
+
+  text: '#111827', // Deeper titles
+  textSecondary: '#4B5563',
   textMuted: '#94A3B8',
   textInverse: '#FFFFFF',
-  
-  border: '#E2E8F0',
-  borderLight: '#F1F5F9',
-  
+
+  border: '#E5E7EB',
+  borderLight: '#F3F4F6',
+
   riskLow: '#10B981',
   riskLowBg: '#D1FAE5',
   riskMedium: '#F59E0B',
@@ -25,19 +25,19 @@ const Colors = {
   riskHighBg: '#FEE2E2',
   riskEmergency: '#DC2626',
   riskEmergencyBg: '#FEE2E2',
-  
+
   skinScan: '#8B5CF6',
-  skinScanBg: '#EDE9FE',
+  skinScanBg: '#F5F3FF',
   eyeScan: '#0EA5E9',
-  eyeScanBg: '#E0F2FE',
-  
+  eyeScanBg: '#F0F9FF',
+
   warning: '#F59E0B',
   warningBg: '#FFFBEB',
-  info: '#3B82F6',
-  infoBg: '#EFF6FF',
-  
-  overlay: 'rgba(15, 23, 42, 0.6)',
-  shadow: 'rgba(15, 23, 42, 0.08)',
+  info: '#6366F1',
+  infoBg: '#EEF2FF',
+
+  overlay: 'rgba(17, 24, 39, 0.6)',
+  shadow: 'rgba(0, 0, 0, 0.05)',
 };
 
 export default Colors;

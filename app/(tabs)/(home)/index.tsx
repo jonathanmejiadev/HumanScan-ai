@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     width: 58, // Slightly larger
     height: 58,
     borderRadius: 29,
-    backgroundColor: '#3B82F6', // Brand Blue
+    backgroundColor: '#6366F1', // Indigo Brand Blue
     justifyContent: 'center',
     alignItems: 'center',
     // Premium floating shadow
