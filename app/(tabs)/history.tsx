@@ -9,10 +9,12 @@ import {
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Clock, Scan, Eye, ChevronRight, Inbox } from 'lucide-react-native';
+import { Clock, Scan, Eye, ChevronRight, Inbox, Trash2 } from 'lucide-react-native';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import Colors from '@/constants/colors';
 import { AnalysisResult, RiskLevel } from '@/types/analysis';
+import { MODULES } from '@/constants/modules';
+import { Alert } from 'react-native';
 
 const getRiskColor = (risk: RiskLevel) => {
   switch (risk) {
@@ -45,10 +47,27 @@ const formatDate = (timestamp: number) => {
   });
 };
 
-function HistoryItem({ item }: { item: AnalysisResult }) {
+function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: string) => void }) {
   const handlePress = () => {
     router.push({ pathname: '/result', params: { id: item.id } });
   };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Eliminar análisis',
+      '¿Estás seguro de que deseas eliminar este análisis? Esta acción no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => onDelete(item.id)
+        }
+      ]
+    );
+  };
+
+  const moduleInfo = MODULES[item.scanType];
 
   return (
     <TouchableOpacity
@@ -81,7 +100,7 @@ function HistoryItem({ item }: { item: AnalysisResult }) {
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.scanType === 'skin' ? 'Análisis Dermatológico' : 'Análisis Ocular'}
+            Análisis {moduleInfo.name}
           </Text>
           <View style={[styles.riskBadge, { backgroundColor: getRiskBgColor(item.triaje_riesgo) }]}>
             <Text style={[styles.riskText, { color: getRiskColor(item.triaje_riesgo) }]}>
@@ -94,9 +113,19 @@ function HistoryItem({ item }: { item: AnalysisResult }) {
           {item.hallazgos_principales.slice(0, 2).join(', ')}
         </Text>
 
-        <View style={styles.dateRow}>
-          <Clock color={Colors.textMuted} size={12} />
-          <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
+        <View style={styles.cardFooter}>
+          <View style={styles.dateRow}>
+            <Clock color={Colors.textMuted} size={12} />
+            <Text style={styles.dateText}>{formatDate(item.timestamp)}</Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleDelete}
+            style={styles.deleteButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Trash2 color={Colors.riskHigh} size={18} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -106,7 +135,7 @@ function HistoryItem({ item }: { item: AnalysisResult }) {
 }
 
 export default function HistoryScreen() {
-  const { history, isLoading, refresh } = useScanHistory();
+  const { history, isLoading, refresh, removeFromHistory } = useScanHistory();
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
@@ -132,7 +161,12 @@ export default function HistoryScreen() {
       <FlatList
         data={history}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <HistoryItem item={item} />}
+        renderItem={({ item }) => (
+          <HistoryItem
+            item={item}
+            onDelete={removeFromHistory}
+          />
+        )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}
         refreshControl={
@@ -248,12 +282,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 18,
-    marginBottom: 6,
+    marginBottom: 8,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  deleteButton: {
+    padding: 2,
   },
   dateText: {
     fontSize: 11,

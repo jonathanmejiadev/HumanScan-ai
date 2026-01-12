@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,11 @@ import { ScanType, AnalysisResult } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
 
 export default function ScanScreen() {
-  const { type } = useLocalSearchParams<{ type: ScanType }>();
+  const { type, imageUri: paramUri, imageBase64: paramBase64 } = useLocalSearchParams<{
+    type: ScanType,
+    imageUri?: string,
+    imageBase64?: string
+  }>();
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const { addToHistory } = useScanHistory();
@@ -32,10 +36,11 @@ export default function ScanScreen() {
   const moduleConfig = MODULES[scanType];
 
   const analysisMutation = useMutation({
-    mutationFn: async () => {
-      if (!imageBase64) throw new Error('No image selected');
+    mutationFn: async (overrideBase64?: string) => {
+      const base64ToUse = overrideBase64 || imageBase64;
+      if (!base64ToUse) throw new Error('No image selected');
       console.log('[ScanScreen] Starting analysis...');
-      return analyzeImage(imageBase64, scanType);
+      return analyzeImage(base64ToUse, scanType);
     },
     onSuccess: async (result) => {
       console.log('[ScanScreen] Analysis successful:', result);
@@ -61,6 +66,18 @@ export default function ScanScreen() {
       );
     },
   });
+
+  // Manejar imagen recibida por parámetros (Skip camera flow)
+  useEffect(() => {
+    if (paramUri && paramBase64) {
+      console.log('[ScanScreen] Imagen recibida desde el Escáner Universal');
+      setImageUri(paramUri);
+      setImageBase64(paramBase64);
+
+      // Disparar análisis automático
+      analysisMutation.mutate(paramBase64);
+    }
+  }, [paramUri, paramBase64]);
 
   const pickImage = async (useCamera: boolean) => {
     try {
@@ -115,7 +132,7 @@ export default function ScanScreen() {
       Alert.alert('Selecciona una imagen', 'Por favor, captura o selecciona una imagen para analizar.');
       return;
     }
-    analysisMutation.mutate();
+    analysisMutation.mutate(undefined);
   };
 
   return (

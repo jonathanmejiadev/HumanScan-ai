@@ -27,6 +27,7 @@ type ScanStatus = 'idle' | 'capturing' | 'identifying' | 'detected' | 'finished'
 export default function UniversalScannerScreen() {
     const [status, setStatus] = useState<ScanStatus>('idle');
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const [imageBase64, setImageBase64] = useState<string | null>(null);
     const [classification, setClassification] = useState<ClassificationResult | null>(null);
     const [displayText, setDisplayText] = useState('Alistando visión inteligente...');
 
@@ -87,6 +88,7 @@ export default function UniversalScannerScreen() {
 
         if (!result.canceled && result.assets[0]) {
             setImageUri(result.assets[0].uri);
+            setImageBase64(result.assets[0].base64 || null);
             setStatus('identifying');
 
             try {
@@ -102,10 +104,14 @@ export default function UniversalScannerScreen() {
     };
 
     const handleGoToDeepAnalysis = () => {
-        if (classification?.recommendedModule) {
+        if (classification?.recommendedModule && imageUri) {
             router.push({
                 pathname: '/scan',
-                params: { type: classification.recommendedModule }
+                params: {
+                    type: classification.recommendedModule,
+                    imageUri: imageUri,
+                    imageBase64: imageBase64
+                }
             });
         }
     };
