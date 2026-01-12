@@ -68,10 +68,15 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                 onPressOut={handlePressOut}
                 activeOpacity={1}
             >
-                <View style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}>
+                <LinearGradient
+                    colors={[module.accentColor + '1A', '#FFFFFF']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[styles.mainContainer, fullDescription && { paddingVertical: 20 }]}
+                >
                     {/* Left: Icon */}
                     <View style={[styles.iconContainer, { borderColor: module.accentColor }]}>
-                        <CategoryIcon scanType={scanType} size={24} color={module.accentColor} />
+                        <CategoryIcon scanType={scanType} size={22} color={module.accentColor} />
                     </View>
 
                     {/* Center: Content */}
@@ -99,10 +104,7 @@ export default function ModuleCard({ scanType, onPress, onHelpPress, fullDescrip
                     <View style={styles.arrowContainer}>
                         <ChevronRight size={20} color="#9CA3AF" />
                     </View>
-
-                    {/* Identity Bar */}
-                    <View style={[styles.identityBar, { backgroundColor: module.accentColor }]} />
-                </View>
+                </LinearGradient>
             </TouchableOpacity>
         </Animated.View>
     );
@@ -120,11 +122,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 16,
         alignItems: 'center',
+        flex: 1,
     },
     iconContainer: {
-        width: 52,
-        height: 52,
-        borderRadius: 26,
+        width: 48, // Standardized with ToolsCarousel
+        height: 48,
+        borderRadius: 24,
         backgroundColor: '#FFFFFF',
         borderWidth: 1.5,
         justifyContent: 'center',
@@ -153,29 +156,19 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     badge: {
-        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: '#F3F4F6', // Soft grey capsule
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 16,
     },
     badgeText: {
         fontSize: 10,
-        fontWeight: '600',
+        fontWeight: '700',
         color: '#4B5563',
     },
     arrowContainer: {
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 4,
-    },
-    identityBar: {
-        position: 'absolute',
-        bottom: 0,
-        left: '15%',
-        right: '15%',
-        height: 3,
-        borderRadius: 1.5,
     },
 });

@@ -55,7 +55,7 @@ export default function QuickScanGrid({
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 20,
-        marginTop: 8,
+        marginTop: 4, // Reduced to balance with ToolsCarousel's marginVertical
     },
     header: {
         flexDirection: 'row',

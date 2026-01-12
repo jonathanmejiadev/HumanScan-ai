@@ -140,7 +140,8 @@ export default function ToolsCarousel({ onToolPress }: ToolsCarouselProps) {
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 16,
+        marginTop: 8, // 12 (SmartScan bottom) + 8 = 20px
+        marginBottom: 16, // 16 + 4 (QuickScan top) = 20px
     },
     header: {
         paddingHorizontal: 20,
