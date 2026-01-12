@@ -91,7 +91,7 @@ export const AIService = {
         }
 
         try {
-            const url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
 
             const prompt = `Analiza esta imagen médica y determina qué parte del cuerpo o especialidad de la app corresponde.
             Responde ÚNICAMENTE en formato JSON con esta estructura:
@@ -164,7 +164,7 @@ export const AIService = {
         let aiResponseText = '';
 
         try {
-            const url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY;
 
             const payload = {
                 contents: [
@@ -195,7 +195,7 @@ export const AIService = {
 
             if (!response.ok) {
                 // Flash falló, probar Pro
-                const urlPro = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=" + API_KEY;
+                const urlPro = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + API_KEY;
                 const responsePro = await fetch(urlPro, { // Mismo payload
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
