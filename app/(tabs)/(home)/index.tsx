@@ -12,9 +12,7 @@ import SmartScanCard from '@/components/home/SmartScanCard';
 import QuickScanGrid from '@/components/home/QuickScanGrid';
 import MedicalDisclaimer from '@/components/home/MedicalDisclaimer';
 import PhotoGuideModal from '@/components/home/PhotoGuideModal';
-import MedicationScannerBanner from '@/components/home/MedicationScannerBanner';
-import NutritionScannerBanner from '@/components/home/NutritionScannerBanner';
-import LabScannerBanner from '@/components/home/LabScannerBanner';
+import ToolsCarousel from '@/components/home/ToolsCarousel';
 import { router } from 'expo-router';
 import { ScanType } from '@/types/analysis';
 import { Bot } from 'lucide-react-native';
@@ -85,16 +83,8 @@ export default function HomeScreen() {
 
         <SmartScanCard onPress={handleSmartScan} />
 
-        <MedicationScannerBanner
-          onPress={() => router.push({ pathname: '/scan', params: { type: 'medication' } })}
-        />
-
-        <NutritionScannerBanner
-          onPress={() => router.push({ pathname: '/scan', params: { type: 'nutrition' } })}
-        />
-
-        <LabScannerBanner
-          onPress={handleLabScan}
+        <ToolsCarousel
+          onToolPress={(type) => router.push({ pathname: '/scan', params: { type } })}
         />
 
         <QuickScanGrid
