@@ -77,7 +77,8 @@ export default function UniversalScannerScreen() {
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: (ImagePicker as any).MediaType.Images,
+            // @ts-ignore - Deprecated but necessary for this version
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.8,
