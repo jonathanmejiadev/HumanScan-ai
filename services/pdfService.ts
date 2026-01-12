@@ -5,16 +5,16 @@ import { UserProfile } from '@/types/user';
 import { MODULES } from '@/constants/modules';
 
 export const PDFService = {
-    generateHistoryReport: async (results: AnalysisResult[], user: UserProfile | null) => {
-        const date = new Date().toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-        });
+  generateHistoryReport: async (results: AnalysisResult[], user: UserProfile | null) => {
+    const date = new Date().toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
 
-        const userName = user?.nombre || 'Paciente';
+    const userName = user?.nombre || 'Paciente';
 
-        const htmlContent = `
+    const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -50,7 +50,7 @@ export const PDFService = {
           }
           .patient-info p {
             margin: 4px 0;
-            color: #6B7280;
+            color: #4B5563;
             font-size: 14px;
           }
           .report-title {
@@ -82,7 +82,7 @@ export const PDFService = {
             color: #3B82F6;
           }
           .analysis-date {
-            color: #9CA3AF;
+            color: #4B5563;
             font-size: 12px;
           }
           .analysis-content {
@@ -101,7 +101,7 @@ export const PDFService = {
           }
           .result-label {
             font-size: 12px;
-            color: #6B7280;
+            color: #4B5563;
             text-transform: uppercase;
             margin-bottom: 4px;
           }
@@ -129,7 +129,7 @@ export const PDFService = {
             border-top: 1px solid #E5E7EB;
             text-align: center;
             font-size: 12px;
-            color: #9CA3AF;
+            color: #4B5563;
           }
           .disclaimer {
             font-style: italic;
@@ -153,39 +153,39 @@ export const PDFService = {
 
         <div class="content">
           ${results.map(item => {
-            const moduleInfo = MODULES[item.scanType];
-            const itemDate = new Date(item.timestamp).toLocaleDateString('es-ES', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+      const moduleInfo = MODULES[item.scanType];
+      const itemDate = new Date(item.timestamp).toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
 
-            let mainTitle = '';
-            let mainResult = '';
-            let interpretation = '';
-            let risk = (item as any).triaje_riesgo || 'N/A';
+      let mainTitle = '';
+      let mainResult = '';
+      let interpretation = '';
+      let risk = (item as any).triaje_riesgo || 'N/A';
 
-            if (item.scanType === 'medication') {
-                mainTitle = 'Identificación de Medicamento';
-                mainResult = (item as any).nombre_detectado;
-                interpretation = (item as any).para_que_sirve;
-            } else if (item.scanType === 'nutrition') {
-                mainTitle = 'Análisis Nutricional';
-                mainResult = (item as any).nombre_plato;
-                interpretation = (item as any).analisis_breve;
-            } else if (item.scanType === 'lab_results') {
-                mainTitle = 'Resultados de Laboratorio';
-                mainResult = (item as any).tipo_estudio;
-                interpretation = (item as any).resumen_medico;
-            } else {
-                mainTitle = `Análisis Bio-Visual: ${moduleInfo.name}`;
-                mainResult = (item as any).hallazgos_principales?.join(', ') || 'Sin hallazgos específicos';
-                interpretation = (item as any).descripcion_tecnica;
-            }
+      if (item.scanType === 'medication') {
+        mainTitle = 'Identificación de Medicamento';
+        mainResult = (item as any).nombre_detectado;
+        interpretation = (item as any).para_que_sirve;
+      } else if (item.scanType === 'nutrition') {
+        mainTitle = 'Análisis Nutricional';
+        mainResult = (item as any).nombre_plato;
+        interpretation = (item as any).analisis_breve;
+      } else if (item.scanType === 'lab_results') {
+        mainTitle = 'Resultados de Laboratorio';
+        mainResult = (item as any).tipo_estudio;
+        interpretation = (item as any).resumen_medico;
+      } else {
+        mainTitle = `Análisis Bio-Visual: ${moduleInfo.name}`;
+        mainResult = (item as any).hallazgos_principales?.join(', ') || 'Sin hallazgos específicos';
+        interpretation = (item as any).descripcion_tecnica;
+      }
 
-            return `
+      return `
               <div class="analysis-item">
                 <div class="analysis-header">
                   <span class="analysis-type">${mainTitle}</span>
@@ -208,7 +208,7 @@ export const PDFService = {
                 </div>
               </div>
             `;
-        }).join('')}
+    }).join('')}
         </div>
 
         <div class="footer">
@@ -219,12 +219,12 @@ export const PDFService = {
       </html>
     `;
 
-        try {
-            const { uri } = await Print.printToFileAsync({ html: htmlContent });
-            await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
-        } catch (error) {
-            console.error('Error generating or sharing PDF:', error);
-            throw error;
-        }
+    try {
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+    } catch (error) {
+      console.error('Error generating or sharing PDF:', error);
+      throw error;
     }
+  }
 };
