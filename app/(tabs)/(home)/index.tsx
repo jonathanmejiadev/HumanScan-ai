@@ -131,15 +131,15 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 20,
-    width: 58, // Slightly larger
+    bottom: 90, // Lifted above absolute Tab Bar
+    width: 58,
     height: 58,
     borderRadius: 29,
     backgroundColor: '#6366F1', // Indigo Brand Blue
     justifyContent: 'center',
     alignItems: 'center',
     // Premium floating shadow
-    shadowColor: '#3B82F6',
+    shadowColor: '#6366F1', // Indigo Shadow
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 15,
