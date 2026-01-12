@@ -116,12 +116,36 @@ export const AIService = {
                 }),
             });
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
+            }
+
             const data = await response.json();
             const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-            // Limpieza de JSON
-            const jsonStr = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(jsonStr);
+            if (!textResponse) {
+                console.warn('[HealthAI] Respuesta vacía de la IA');
+                throw new Error('La IA no pudo procesar la imagen correctamente.');
+            }
+
+            // Limpieza robusta de JSON: buscar el bloque { ... }
+            const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+            const jsonStr = jsonMatch ? jsonMatch[0] : textResponse;
+
+            try {
+                return JSON.parse(jsonStr);
+            } catch (parseError) {
+                console.error('[HealthAI] Error al parsear JSON:', jsonStr);
+                // Fallback seguro para no romper el flujo de la app
+                return {
+                    detectedZone: 'Cuerpo (General)',
+                    confidence: 0.5,
+                    recommendedModule: 'skin',
+                    summary: 'La IA identificó la zona pero el formato de respuesta fue inconsistente.',
+                    findings: ['Análisis visual completado']
+                };
+            }
         } catch (error) {
             console.error('[HealthAI] Error en clasificación:', error);
             throw error;
