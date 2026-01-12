@@ -20,21 +20,26 @@ interface ToolCardProps {
 
 const ToolCard = ({ title, subtitle, icon, color, onPress }: ToolCardProps) => (
     <TouchableOpacity
-        style={styles.card}
+        style={[
+            styles.card,
+            {
+                backgroundColor: color + '05',
+                borderColor: color + '15',
+                shadowColor: color,
+            }
+        ]}
         onPress={onPress}
         activeOpacity={0.8}
     >
-        <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
-            {React.cloneElement(icon as React.ReactElement<any>, { color, size: 28 })}
-        </View>
+        <View style={styles.contentWrapper}>
+            <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
+                {React.cloneElement(icon as React.ReactElement<any>, { color, size: 24 })}
+            </View>
 
-        <View style={styles.textContainer}>
-            <Text style={styles.cardTitle}>{title}</Text>
-            <Text style={styles.cardSubtitle}>{subtitle}</Text>
-        </View>
-
-        <View style={[styles.bottomBadge, { backgroundColor: color }]}>
-            <ChevronRight size={12} color="#FFFFFF" strokeWidth={3} />
+            <View style={styles.textContainer}>
+                <Text style={styles.cardTitle}>{title}</Text>
+                <Text style={styles.cardSubtitle}>{subtitle}</Text>
+            </View>
         </View>
     </TouchableOpacity>
 );
@@ -105,25 +110,25 @@ const styles = StyleSheet.create({
     },
     card: {
         width: 144,
-        height: 180,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 24,
-        padding: 16,
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        height: 126, // Reduced height by 30%
+        borderRadius: 20,
+        padding: 12,
         borderWidth: 1,
-        borderColor: '#F3F4F6',
-        // Shadows
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 3,
+        // Shadows (Glow effect)
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    contentWrapper: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     iconCircle: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
@@ -132,24 +137,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cardTitle: {
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '700',
         color: '#111827',
-        marginBottom: 4,
+        marginBottom: 2,
         textAlign: 'center',
     },
     cardSubtitle: {
-        fontSize: 12,
+        fontSize: 11,
         color: '#6B7280',
         textAlign: 'center',
-        lineHeight: 16,
-    },
-    bottomBadge: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 8,
+        lineHeight: 14,
     },
 });
