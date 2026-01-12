@@ -122,7 +122,7 @@ export default function UniversalScannerScreen() {
             {/* Header Toolbar */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-                    <X color="#FFFFFF" size={24} />
+                    <X color={Colors.text} size={24} />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Escáner Universal IA</Text>
                 <View style={{ width: 40 }} />
@@ -151,7 +151,7 @@ export default function UniversalScannerScreen() {
                     </View>
                 ) : (
                     <TouchableOpacity style={styles.placeholderGrid} onPress={handlePickImage}>
-                        <Search size={48} color="rgba(255,255,255,0.3)" />
+                        <Search size={48} color={Colors.textMuted} />
                         <Text style={styles.placeholderText}>Toca para iniciar visión IA</Text>
                     </TouchableOpacity>
                 )}
@@ -160,18 +160,18 @@ export default function UniversalScannerScreen() {
             {/* AI Feedback Panel */}
             <View style={styles.feedbackPanel}>
                 <View style={styles.statusIndicator}>
-                    <Activity size={20} color={status === 'identifying' ? '#7C3AED' : '#10B981'} />
+                    <Activity size={20} color={status === 'identifying' ? Colors.primary : Colors.secondary} />
                     <Text style={styles.statusText}>{displayText}</Text>
                 </View>
 
                 {status === 'detected' && classification && (
                     <Animated.View style={styles.resultDetails}>
                         <LinearGradient
-                            colors={['rgba(124, 58, 237, 0.1)', 'rgba(30, 64, 175, 0.05)']}
+                            colors={['#F0FDFA', '#F8FAFC']}
                             style={styles.resultCard}
                         >
                             <View style={styles.resultHeader}>
-                                <ShieldCheck size={24} color="#1E40AF" />
+                                <ShieldCheck size={24} color={Colors.primary} />
                                 <Text style={styles.resultTitle}>Predicción IA</Text>
                             </View>
 
@@ -193,7 +193,7 @@ export default function UniversalScannerScreen() {
                                 onPress={handleGoToDeepAnalysis}
                             >
                                 <LinearGradient
-                                    colors={['#1E40AF', '#7C3AED']}
+                                    colors={[Colors.primary, Colors.primaryDark]}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 0 }}
                                     style={styles.gradientButton}
@@ -220,7 +220,7 @@ export default function UniversalScannerScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0F172A', // Very dark blue/black
+        backgroundColor: Colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -234,12 +234,17 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: Colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     headerTitle: {
-        color: '#FFFFFF',
+        color: Colors.text,
         fontSize: 18,
         fontWeight: '700',
     },
@@ -249,14 +254,20 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: 40,
         borderRadius: 30,
-        backgroundColor: '#1E293B',
+        backgroundColor: Colors.surface,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: Colors.border,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 12,
+        elevation: 5,
     },
     previewWrapper: {
         flex: 1,
         position: 'relative',
+        backgroundColor: '#000',
     },
     previewImage: {
         width: '100%',
@@ -268,8 +279,8 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 3,
-        backgroundColor: '#7C3AED',
-        shadowColor: '#7C3AED',
+        backgroundColor: Colors.primary,
+        shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 1,
         shadowRadius: 10,
@@ -284,7 +295,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: 30,
         height: 30,
-        borderColor: '#7C3AED',
+        borderColor: Colors.primary,
         borderWidth: 4,
     },
     topLeft: {
@@ -318,7 +329,7 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     placeholderText: {
-        color: 'rgba(255,255,255,0.5)',
+        color: Colors.textSecondary,
         fontSize: 15,
         fontWeight: '500',
     },
@@ -330,14 +341,19 @@ const styles = StyleSheet.create({
     statusIndicator: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: Colors.surface,
         padding: 12,
         borderRadius: 16,
         gap: 10,
         marginBottom: 20,
+        shadowColor: Colors.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     statusText: {
-        color: '#E2E8F0',
+        color: Colors.textSecondary,
         fontSize: 14,
         fontWeight: '600',
     },
@@ -348,7 +364,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 24,
         borderWidth: 1,
-        borderColor: 'rgba(124, 58, 237, 0.2)',
+        borderColor: Colors.border,
     },
     resultHeader: {
         flexDirection: 'row',
@@ -357,12 +373,12 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     resultTitle: {
-        color: '#FFFFFF',
+        color: Colors.text,
         fontSize: 18,
         fontWeight: '700',
     },
     detectedLabel: {
-        color: '#E2E8F0',
+        color: Colors.primary,
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 16,
@@ -380,10 +396,10 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 3,
-        backgroundColor: '#7C3AED',
+        backgroundColor: Colors.primary,
     },
     findingText: {
-        color: '#94A3B8',
+        color: Colors.textSecondary,
         fontSize: 13,
     },
     deepAnalysisButton: {
@@ -406,11 +422,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#334155',
+        backgroundColor: Colors.primary,
         paddingVertical: 18,
         borderRadius: 20,
         gap: 12,
         marginTop: 20,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     actionButtonText: {
         color: '#FFFFFF',
