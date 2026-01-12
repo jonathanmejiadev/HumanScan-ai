@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ChevronRight, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -9,37 +9,44 @@ interface SmartScanCardProps {
 
 export default function SmartScanCard({ onPress }: SmartScanCardProps) {
     return (
-        <Pressable onPress={onPress}>
-            {({ pressed }) => (
-                <LinearGradient
-                    colors={['#7C3AED', '#A78BFA']} // Violet Intenso to Lavanda
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={[
-                        styles.container,
-                        pressed && { opacity: 0.95, transform: [{ scale: 0.98 }] }
-                    ]}
-                >
-                    {/* Text Content */}
+        <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
+            <LinearGradient
+                colors={['#1E40AF', '#7C3AED']} // Deep Cobalt Blue to Electric Violet
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.container}
+            >
+                {/* Main Content Area */}
+                <View style={styles.mainContent}>
                     <View style={styles.textContent}>
                         <Text style={styles.title}>Análisis Universal IA</Text>
-                        <Text style={styles.description} numberOfLines={2}>
-                            Identifica y analiza cualquier anomalía de salud al instante.
+                        <Text style={styles.description}>
+                            Apunta a cualquier zona y deja que la IA identifique y analice el problema por ti.
                         </Text>
                     </View>
+                </View>
 
-                    {/* Circular Action Button */}
-                    <View style={styles.actionButton}>
-                        <ChevronRight size={22} color="#7C3AED" strokeWidth={3} />
-                    </View>
+                {/* Vertical Spacer for better separation */}
+                <View style={styles.spacer} />
 
-                    {/* Decorative Background Graphic */}
-                    <View style={styles.decorativeIcon}>
-                        <Sparkles size={110} color="rgba(255, 255, 255, 0.1)" strokeWidth={1} />
-                    </View>
-                </LinearGradient>
-            )}
-        </Pressable>
+                {/* Bottom Action Area */}
+                <View style={styles.footer}>
+                    <TouchableOpacity
+                        style={styles.startButton}
+                        onPress={onPress}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.startButtonText}>Escanear ahora</Text>
+                        <ChevronRight size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Decorative Elements */}
+                <View style={styles.decorativeIcon}>
+                    <Sparkles size={100} color="rgba(255, 255, 255, 0.1)" strokeWidth={1} />
+                </View>
+            </LinearGradient>
+        </TouchableOpacity>
     );
 }
 
@@ -48,61 +55,58 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginVertical: 12,
         borderRadius: 24,
-        padding: 18,
-        height: 120, // Reduced height for a more compact and modern look
+        padding: 20,
+        minHeight: 160, // Reduced height by 20%
         overflow: 'hidden',
-        flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        position: 'relative',
-        ...Platform.select({
-            ios: {
-                shadowColor: '#7C3AED',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.25,
-                shadowRadius: 12,
-            },
-            android: {
-                elevation: 6,
-            },
-        }),
+    },
+    mainContent: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        zIndex: 2,
     },
     textContent: {
         flex: 1,
-        marginRight: 10,
-        zIndex: 2,
+    },
+    spacer: {
+        height: 20, // Increased spacing
     },
     title: {
-        fontSize: 20,
-        fontWeight: '800',
+        fontSize: 22,
+        fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 4,
-        letterSpacing: -0.5,
+        marginBottom: 6,
     },
     description: {
-        fontSize: 13,
-        color: 'rgba(255, 255, 255, 0.95)',
-        lineHeight: 18,
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.9)',
+        lineHeight: 20,
         fontWeight: '500',
     },
-    actionButton: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: '#FFFFFF',
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        justifyContent: 'center',
         zIndex: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+    },
+    startButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        gap: 4,
+    },
+    startButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14,
     },
     decorativeIcon: {
         position: 'absolute',
-        right: -15,
-        top: -15,
+        right: -30,
+        top: -30,
         zIndex: 1,
     },
 });
