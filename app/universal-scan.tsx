@@ -9,7 +9,9 @@ import {
     Image,
     Alert,
     ActivityIndicator,
+    Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera as CameraIcon, X, Scan, ChevronRight, Activity, ShieldCheck, Search } from 'lucide-react-native';
@@ -25,6 +27,7 @@ const { width, height } = Dimensions.get('window');
 type ScanStatus = 'idle' | 'capturing' | 'identifying' | 'detected' | 'finished';
 
 export default function UniversalScannerScreen() {
+    const insets = useSafeAreaInsets();
     const [status, setStatus] = useState<ScanStatus>('idle');
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -122,7 +125,7 @@ export default function UniversalScannerScreen() {
     });
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 20) }]}>
             <Stack.Screen options={{ headerShown: false }} />
 
             {/* Header Toolbar */}
@@ -410,6 +413,7 @@ const styles = StyleSheet.create({
     },
     deepAnalysisButton: {
         marginTop: 'auto',
+        marginBottom: 8,
     },
     gradientButton: {
         flexDirection: 'row',
