@@ -26,19 +26,13 @@ export default function HomeScreen() {
   };
 
   const handleModuleScan = (scanType: ScanType) => {
-    const specializedTypes: ScanType[] = ['skin', 'ocular'];
-
-    if (specializedTypes.includes(scanType)) {
-      // Show photo guide first for specialized scans
-      setSelectedScanType(scanType);
-      setShowPhotoGuide(true);
-    } else {
-      // Navigate directly for other scans
-      router.push({ pathname: '/scan', params: { type: scanType } });
-    }
+    // Navigate directly for all scans as requested
+    router.push({ pathname: '/scan', params: { type: scanType } });
   };
 
   const handleShowGuide = (scanType: ScanType) => {
+    // Optional: guide can still be triggered by the help icon if needed, 
+    // but the main flow is now direct.
     setSelectedScanType(scanType);
     setShowPhotoGuide(true);
   };
