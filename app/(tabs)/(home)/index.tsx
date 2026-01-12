@@ -16,16 +16,27 @@ import MedicationScannerBanner from '@/components/home/MedicationScannerBanner';
 import NutritionScannerBanner from '@/components/home/NutritionScannerBanner';
 import LabScannerBanner from '@/components/home/LabScannerBanner';
 import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system/legacy';
 import { ScanType } from '@/types/analysis';
 import { Bot } from 'lucide-react-native';
+import { UserService } from '@/services/userService';
+import { UserProfile } from '@/types/user';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const [showPhotoGuide, setShowPhotoGuide] = useState(false);
   const [selectedScanType, setSelectedScanType] = useState<ScanType>('skin');
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadProfile = async () => {
+        const profile = await UserService.getProfile();
+        setUserProfile(profile);
+      };
+      loadProfile();
+    }, [])
+  );
 
   const handleSmartScan = () => {
     // Navigate to smart scan with automatic detection (Universal IA)
@@ -67,7 +78,10 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <WelcomeHeader userName="Jonathan" />
+        <WelcomeHeader
+          userName={userProfile?.nombre || "Usuario"}
+          onPressAvatar={() => router.push('/profile')}
+        />
 
         <SmartScanCard onPress={handleSmartScan} />
 

@@ -1,4 +1,5 @@
 import { ScanType, ClassificationResult } from '@/types/analysis';
+import { UserService } from './userService';
 
 export interface ChatMessage {
     id: string;
@@ -155,6 +156,9 @@ export const AIService = {
     sendMessage: async (text: string): Promise<ChatMessage> => {
         if (!API_KEY) return AIService.fallbackLogic(text);
 
+        const profile = await UserService.getProfile();
+        const userName = profile?.nombre || currentUserName;
+
         const userMsg: Content = { role: 'user', parts: [{ text: text.trim() }] };
 
         // Optimización de Historial: Slice últimos 10
@@ -171,11 +175,11 @@ export const AIService = {
                     // Inyección de System Prompt al INICIO del historial
                     {
                         role: "user",
-                        parts: [{ text: "SYSTEM INSTRUCTIONS: " + getSystemPrompt(currentUserName) }]
+                        parts: [{ text: "SYSTEM INSTRUCTIONS: " + getSystemPrompt(userName) }]
                     },
                     {
                         role: "model",
-                        parts: [{ text: `Entendido. Soy HealthAI y ayudaré a ${currentUserName} siguiendo tus protocolos médicos.` }]
+                        parts: [{ text: `Entendido. Soy HealthAI y ayudaré a ${userName} siguiendo tus protocolos médicos.` }]
                     },
                     ...historyToSend
                 ],

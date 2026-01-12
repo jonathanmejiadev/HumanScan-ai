@@ -16,8 +16,10 @@ import {
   Heart,
   Info,
   ChevronRight,
+  User as UserIcon,
 } from 'lucide-react-native';
 import { useScanHistory } from '@/hooks/useScanHistory';
+import { router } from 'expo-router';
 import Colors from '@/constants/colors';
 
 interface SettingsItemProps {
@@ -101,6 +103,18 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Ajustes</Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>PERFIL</Text>
+        <View style={styles.sectionContent}>
+          <SettingsItem
+            icon={<UserIcon color={Colors.primary} size={20} />}
+            title="Información de Salud"
+            subtitle="Nombre, condiciones y alergias"
+            onPress={() => router.push('/profile')}
+          />
+        </View>
       </View>
 
       <View style={styles.section}>

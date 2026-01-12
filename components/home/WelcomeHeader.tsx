@@ -1,22 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface WelcomeHeaderProps {
     userName?: string;
+    onPressAvatar?: () => void;
 }
 
-export default function WelcomeHeader({ userName = 'Jonathan' }: WelcomeHeaderProps) {
+export default function WelcomeHeader({ userName = 'Jonathan', onPressAvatar }: WelcomeHeaderProps) {
     return (
         <View style={styles.container}>
             <View style={styles.textContainer}>
                 <Text style={styles.greeting}>Hola, {userName}</Text>
                 <Text style={styles.subtitle}>¿Qué analizaremos hoy?</Text>
             </View>
-            <View style={styles.avatarContainer}>
+            <TouchableOpacity
+                style={styles.avatarContainer}
+                onPress={onPressAvatar}
+                activeOpacity={0.7}
+            >
                 <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
                 </View>
-            </View>
+            </TouchableOpacity>
         </View>
     );
 }

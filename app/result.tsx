@@ -31,6 +31,7 @@ import {
   Calendar,
   Beaker,
   Activity,
+  Bot,
 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '@/constants/colors';
@@ -136,6 +137,17 @@ export default function ResultScreen() {
     } catch (error) {
       console.error('[ResultScreen] Share error:', error);
     }
+  };
+
+  const handleAskAI = () => {
+    if (!result) return;
+    router.push({
+      pathname: '/chat',
+      params: {
+        context: JSON.stringify(result),
+        scanType: result.scanType
+      }
+    });
   };
 
   if (!result) {
@@ -487,6 +499,15 @@ export default function ResultScreen() {
 
       <View style={styles.bottomActions}>
         <TouchableOpacity
+          style={styles.chatButton}
+          onPress={handleAskAI}
+          activeOpacity={0.8}
+        >
+          <Bot color={Colors.skinScan} size={20} />
+          <Text style={styles.chatButtonText}>Preguntar a la IA</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => router.replace('/')}
           activeOpacity={0.8}
@@ -825,6 +846,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: Colors.textInverse,
+  },
+  chatButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.skinScan,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  chatButtonText: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.skinScan,
   },
   errorContainer: {
     flex: 1,

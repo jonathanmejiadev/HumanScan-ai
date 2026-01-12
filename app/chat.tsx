@@ -12,8 +12,9 @@ import {
     SafeAreaView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, Stack } from 'expo-router';
-import { ArrowLeft, Send, Bot, User, ChevronRight } from 'lucide-react-native';
+import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Send, Bot, User, ChevronRight, X } from 'lucide-react-native';
+import Colors from '@/constants/colors';
 import { AIService, ChatMessage } from '@/services/aiService';
 import { ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
@@ -21,15 +22,56 @@ import { MODULES } from '@/constants/modules';
 export default function ChatScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
+    const params = useLocalSearchParams();
+
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [activeContext, setActiveContext] = useState<any>(null);
     const flatListRef = useRef<FlatList>(null);
+    const isInitialized = useRef(false);
 
     useEffect(() => {
-        // Cargar mensaje inicial
-        setMessages([AIService.getInitialGreeting()]);
-    }, []);
+        if (isInitialized.current) return;
+
+        if (params.context && params.scanType) {
+            isInitialized.current = true;
+            try {
+                const resultItems = JSON.parse(params.context as string);
+                const type = params.scanType as string;
+                setActiveContext({ result: resultItems, scanType: type });
+
+                // Inyección de Contexto (Prompt Invisible)
+                const contextTitle = getContextTitle(resultItems, type);
+                const contextMsg = `Contexto: El usuario acaba de realizar un escaneo de tipo ${type}. Resultado detallado: ${params.context}. Responde saludando amigablemente y ofrece ayuda específica o aclaraciones sobre este análisis de ${contextTitle}.`;
+
+                setIsLoading(true);
+                AIService.sendMessage(contextMsg).then(response => {
+                    setMessages(prev => [...prev, response]);
+                    setIsLoading(false);
+                }).catch(err => {
+                    console.error('Error injecting context:', err);
+                    setMessages([AIService.getInitialGreeting()]);
+                    setIsLoading(false);
+                });
+            } catch (error) {
+                console.error('Error parsing context:', error);
+                setMessages([AIService.getInitialGreeting()]);
+            }
+        } else if (messages.length === 0) {
+            isInitialized.current = true;
+            setMessages([AIService.getInitialGreeting()]);
+        }
+    }, [params.context, params.scanType]);
+
+    const getContextTitle = (result: any, scanType: string) => {
+        switch (scanType) {
+            case 'medication': return result.nombre_detectado;
+            case 'nutrition': return result.nombre_plato;
+            case 'lab_results': return result.tipo_estudio;
+            default: return 'análisis reciente';
+        }
+    };
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -118,25 +160,38 @@ export default function ChatScreen() {
 
     return (
         <View style={[styles.container, { paddingTop: insets.top }]}>
-            <Stack.Screen options={{ headerShown: false }} />
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <ArrowLeft size={24} color="#1F2937" />
-                </TouchableOpacity>
-                <View>
-                    <Text style={styles.headerTitle}>HealthAI</Text>
-                    <View style={styles.statusContainer}>
-                        <View style={styles.statusDot} />
-                        <Text style={styles.statusText}>Asistente Online</Text>
-                    </View>
-                </View>
-            </View>
-
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
             >
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <ArrowLeft size={24} color="#1F2937" />
+                    </TouchableOpacity>
+                    <View>
+                        <Text style={styles.headerTitle}>HealthAI</Text>
+                        <View style={styles.statusContainer}>
+                            <View style={styles.statusDot} />
+                            <Text style={styles.statusText}>Asistente Online</Text>
+                        </View>
+                    </View>
+                </View>
+
+                {activeContext && (
+                    <View style={styles.contextBanner}>
+                        <View style={styles.contextInfo}>
+                            <Bot size={16} color={Colors.skinScan} />
+                            <Text style={styles.contextText} numberOfLines={1}>
+                                Consultando sobre: {getContextTitle(activeContext.result, activeContext.scanType)}
+                            </Text>
+                        </View>
+                        <TouchableOpacity onPress={() => setActiveContext(null)} style={styles.clearContext}>
+                            <X size={16} color={Colors.textMuted} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 <FlatList
                     ref={flatListRef}
                     data={messages}
@@ -352,5 +407,29 @@ const styles = StyleSheet.create({
     sendButtonDisabled: {
         backgroundColor: '#9CA3AF',
         opacity: 0.5,
+    },
+    contextBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: Colors.skinScanBg,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.border,
+    },
+    contextInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        flex: 1,
+    },
+    contextText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: Colors.skinScan,
+    },
+    clearContext: {
+        padding: 4,
     },
 });

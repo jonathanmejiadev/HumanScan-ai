@@ -3,6 +3,7 @@ import { AnalysisResult, ScanType } from '@/types/analysis';
 import { DENTAL_ANALYSIS_PROMPT } from './dentalAnalysisService';
 import { NAILS_ANALYSIS_PROMPT } from './nailsAnalysisService';
 import { WOUND_ANALYSIS_PROMPT } from './woundTrackingService';
+import { UserService } from './userService';
 
 const analysisSchema = z.object({
   descripcion_tecnica: z.string().describe('Descripción objetiva de la zona analizada (morfología, coloración, distribución).'),
@@ -324,11 +325,32 @@ export async function analyzeImage(
     // Limpiar el base64 si viene con prefijo data URL
     const cleanBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
+    const profile = await UserService.getProfile();
+    let patientContext = '';
 
-    const finalPrompt = userNotes
-      ? "CONTEXTO DEL PACIENTE (CRÍTICO): " + userNotes + "\n\n" + prompt
-      : prompt;
+    if (profile) {
+      patientContext = `
+    DATOS DEL PACIENTE:
+    - Nombre: ${profile.nombre}
+    - Edad: ${profile.edad} años
+    - Sexo: ${profile.sexo}
+    - Condiciones Crónicas: ${profile.condiciones.length > 0 ? profile.condiciones.join(', ') : 'Ninguna informada'}
+    - Alergias/Intolerancias: ${profile.alergias.length > 0 ? profile.alergias.join(', ') : 'Ninguna informada'}
+
+    INSTRUCCIÓN DE SEGURIDAD CRÍTICA:
+    Cruza siempre tus hallazgos con el perfil del paciente. Si detectas un medicamento contraindicado para sus alergias o un alimento prohibido para su condición, resáltalo como una alerta de ALTO RIESGO o CRÍTICA en el resumen y los hallazgos.
+    `;
+    }
+
+    let finalPrompt = `${patientContext}\n${prompt}`;
+
+    if (userNotes.trim()) {
+      finalPrompt += `\n\nNOTAS ADICIONALES DEL USUARIO: ${userNotes}`;
+    }
+
+    finalPrompt += `\n\n${JSON_FORMAT_INSTRUCTION}`; // Ensure JSON_FORMAT_INSTRUCTION is always at the very end
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
