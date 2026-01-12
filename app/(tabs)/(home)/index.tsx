@@ -94,8 +94,7 @@ export default function HomeScreen() {
 
         <MedicalDisclaimer />
 
-        {/* Bottom padding for tab bar */}
-        <View style={{ height: 100 }} />
+
       </ScrollView>
 
       <PhotoGuideModal
@@ -126,7 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 120, // Increased for Tab Bar
   },
   fab: {
     position: 'absolute',
