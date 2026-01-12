@@ -125,12 +125,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 120, // Increased for Tab Bar
+    paddingBottom: 160, // Ample clearance for absolute Tab Bar
   },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 90, // Lifted above absolute Tab Bar
+    bottom: 110, // Higher clearance for absolute Tab Bar
     width: 58,
     height: 58,
     borderRadius: 29,

@@ -378,7 +378,7 @@ export default function HistoryScreen() {
       />
 
       {isSelectionMode && selectedIds.length > 0 && (
-        <View style={[styles.fabContainer, { bottom: 90 }]}>
+        <View style={[styles.fabContainer, { bottom: 110 }]}>
           <TouchableOpacity
             style={styles.pdfFab}
             onPress={handleGeneratePdf}
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
-    paddingBottom: 100, // Extra padding for Tab Bar
+    paddingBottom: 150, // More clearance for Tab Bar
     flexGrow: 1,
   },
   historyCard: {

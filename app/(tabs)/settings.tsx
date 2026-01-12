@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
-    paddingBottom: 100, // Extra padding for Tab Bar
+    paddingBottom: 150, // High clearance for Tab Bar
   },
   header: {
     paddingHorizontal: 20,
