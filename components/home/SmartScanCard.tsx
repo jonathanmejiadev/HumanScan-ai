@@ -38,7 +38,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
 
                 {/* Decorative Elements */}
                 <View style={styles.decorativeIcon}>
-                    <Sparkles size={110} color="rgba(255, 255, 255, 0.12)" strokeWidth={1} />
+                    <Sparkles size={80} color="rgba(255, 255, 255, 0.15)" strokeWidth={1} />
                 </View>
             </LinearGradient>
         </TouchableOpacity>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginTop: 4,
     },
@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
     },
     decorativeIcon: {
         position: 'absolute',
-        right: -35,
-        top: -20,
+        right: -10,
+        top: -10,
         zIndex: 1,
     },
 });
