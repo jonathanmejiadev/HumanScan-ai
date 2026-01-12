@@ -503,7 +503,7 @@ export default function ResultScreen() {
           onPress={handleAskAI}
           activeOpacity={0.8}
         >
-          <Bot color={Colors.skinScan} size={20} />
+          <Bot color={Colors.primary} size={20} />
           <Text style={styles.chatButtonText}>Preguntar a la IA</Text>
         </TouchableOpacity>
 
@@ -853,16 +853,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: Colors.skinScan,
+    borderWidth: 1.5, // Slightly thicker for prominence
+    borderColor: Colors.primary,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
   },
   chatButtonText: {
     fontSize: 15,
-    fontWeight: '600' as const,
-    color: Colors.skinScan,
+    fontWeight: '700' as const,
+    color: Colors.primary,
   },
   errorContainer: {
     flex: 1,
