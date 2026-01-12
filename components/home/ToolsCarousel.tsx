@@ -95,6 +95,8 @@ interface ToolsCarouselProps {
     onToolPress: (type: 'medication' | 'nutrition' | 'lab_results') => void;
 }
 
+const SECTION_MARGIN = 20;
+
 export default function ToolsCarousel({ onToolPress }: ToolsCarouselProps) {
     return (
         <View style={styles.container}>
@@ -140,12 +142,12 @@ export default function ToolsCarousel({ onToolPress }: ToolsCarouselProps) {
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 8, // 12 (SmartScan bottom) + 8 = 20px
-        marginBottom: 16, // 16 + 4 (QuickScan top) = 20px
+        marginTop: SECTION_MARGIN,
+        marginBottom: -20, // Offset shadow padding for vertical rhythm
     },
     header: {
         paddingHorizontal: 20,
-        marginBottom: 12,
+        marginBottom: 8,
     },
     sectionTitle: {
         fontSize: 18,

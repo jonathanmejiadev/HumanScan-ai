@@ -9,6 +9,8 @@ interface QuickScanGridProps {
     onHelpPress?: (scanType: ScanType) => void;
 }
 
+const SECTION_MARGIN = 20;
+
 export default function QuickScanGrid({
     onModulePress,
     onHelpPress,
@@ -55,13 +57,13 @@ export default function QuickScanGrid({
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 20,
-        marginTop: 4, // Reduced to balance with ToolsCarousel's marginVertical
+        marginTop: SECTION_MARGIN,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 8,
     },
     title: {
         fontSize: 20,

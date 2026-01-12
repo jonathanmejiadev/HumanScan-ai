@@ -48,7 +48,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: 20,
-        marginVertical: 12,
+        marginTop: 12,
         borderRadius: 24,
         padding: 20,
         height: 144, // Reduced height (160 * 0.9)

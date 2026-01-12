@@ -109,7 +109,7 @@ export default function HomeScreen() {
         onPress={handleVirtualAssistant}
         activeOpacity={0.9}
       >
-        <Bot size={26} color="#FFFFFF" strokeWidth={2} />
+        <Bot size={24} color="#FFFFFF" strokeWidth={2} />
         <View style={styles.onlineIndicator} />
       </TouchableOpacity>
     </View>
@@ -129,20 +129,20 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 110, // Higher clearance for absolute Tab Bar
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#6366F1', // Indigo Brand Blue
+    right: 16,
+    bottom: 90,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0891B2', // User specified Primary solid
     justifyContent: 'center',
     alignItems: 'center',
-    // Premium floating shadow
-    shadowColor: '#6366F1', // Indigo Shadow
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 15,
-    elevation: 8,
+    // Compact floating shadow
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
     zIndex: 100,
   },
   onlineIndicator: {
