@@ -23,7 +23,7 @@ const medicationSchema = z.object({
   como_se_toma: z.string().describe('Pautas generales de administración, aclarando que requiere receta médica.'),
   advertencias_clave: z.array(z.string()).describe('Lista de 3-4 precauciones importantes (Ej: Alcohol, Embarazo).'),
   efectos_secundarios_comunes: z.array(z.string()).describe('Lista breve de efectos adversos frecuentes.'),
-  aviso_legal: z.string().describe('Texto fijo: "La automedicación es peligrosa. Consulte siempre a su médico."'),
+  aviso_legal: z.string().describe('Texto fijo: "ESTE REPORTE ES GENERADO POR IA Y TIENE UN PROPÓSITO INFORMATIVO. No sustituye el prospecto oficial ni el consejo médico. La automedicación representa un riesgo grave para la salud. Antes de consumir cualquier fármaco, consulte a un profesional de la salud."'),
 });
 
 const nutritionSchema = z.object({
@@ -38,7 +38,7 @@ const nutritionSchema = z.object({
   analisis_breve: z.string().describe('Evaluación corta: "¿Es sano? ¿Por qué?".'),
   consejo_nutricional: z.string().describe('Un tip rápido (Ej: "Acompaña con agua", "Controla la porción").'),
   advertencias: z.array(z.string()).describe('Lista de alertas (Ej: "Alto en azúcar", "Contiene gluten", "Ultraprocesado").'),
-  aviso_legal: z.string().describe('Texto fijo: "Las estimaciones nutricionales son orientativas. Consulte a un nutricionista profesional."'),
+  aviso_legal: z.string().describe('Texto fijo: "LOS VALORES SON ESTIMACIONES BASADAS EN IA. Este análisis tiene fines orientativos y no considera necesidades metabólicas individuales. Para un plan nutricional seguro, consulte a un nutricionista certificado."'),
 });
 
 const labSchema = z.object({
@@ -54,7 +54,7 @@ const labSchema = z.object({
     explicacion: z.string().optional().describe('Breve explicación SOLO si está fuera de rango.')
   })).describe('Lista completa de indicadores detectados.'),
   resumen_medico: z.string().describe('Interpretación global clara y profesional.'),
-  aviso_legal: z.string().describe('Texto obligatorio: "Consulta a tu médico para un diagnóstico definitivo."')
+  aviso_legal: z.string().describe('Texto obligatorio: "INTERPRETACIÓN PRELIMINAR GENERADA POR IA. Este informe no constituye un acto médico. Los resultados deben ser validados por un profesional de la salud titular. No modifique tratamientos basándose en este reporte."')
 });
 
 const JSON_FORMAT_INSTRUCTION = `
@@ -83,7 +83,7 @@ Instrucciones de Análisis Clínico:
 
 IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje determinista; usa lenguaje de probabilidad.
 
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional."
+El aviso_legal SIEMPRE debe ser: "ANÁLISIS BIO-VISUAL PRELIMINAR GENERADO POR IA. Este reporte no es equivalente a un diagnóstico clínico profesional. Tiene el fin de orientar y facilitar la consulta médica. No ignore síntomas persistentes y busque evaluación formal."
 
 ${JSON_FORMAT_INSTRUCTION}`;
 
@@ -100,7 +100,7 @@ IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje de
 
 Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones cutáneas".
 
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional."
+El aviso_legal SIEMPRE debe ser: "ANÁLISIS BIO-VISUAL PRELIMINAR GENERADO POR IA. Este reporte no es equivalente a un diagnóstico clínico profesional. Tiene el fin de orientar y facilitar la consulta médica. No ignore síntomas persistentes y busque evaluación formal."
 
 ${JSON_FORMAT_INSTRUCTION}`;
 
@@ -123,7 +123,7 @@ IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje de
 
 Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones cutáneas".
 
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un fisioterapeuta o traumatólogo para obtener un diagnóstico y tratamiento profesional."
+El aviso_legal SIEMPRE debe ser: "EVALUACIÓN POSTURAL PRELIMINAR GENERADA POR IA. Este reporte tiene fines exclusivamente orientativos. Es obligatorio consultar a un fisioterapeuta o traumatólogo colegiado para obtener un diagnóstico profesional."
 
 ${JSON_FORMAT_INSTRUCTION}`;
 
@@ -194,8 +194,8 @@ IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esqu
   "como_se_toma": "string",
   "advertencias_clave": ["string"],
   "efectos_secundarios_comunes": ["string"],
-  "aviso_legal": "La automedicación es peligrosa. Consulte siempre a su médico."
-}`;
+  "aviso_legal": "ESTE REPORTE ES GENERADO POR IA Y TIENE UN PROPÓSITO INFORMATIVO. No sustituye el prospecto oficial ni el consejo médico. La automedicación representa un riesgo grave para la salud. Antes de consumir cualquier fármaco, consulte a un profesional de la salud."
+} micro_prompt para IA: Identifica el medicamento y sé extremadamente precavido.`;
 
 const NUTRITION_ANALYSIS_PROMPT = `Actúas como un Nutricionista experto. Tu misión es analizar la foto de la comida proporcionada, identificando los alimentos, estimando sus porciones y evaluando su calidad nutricional.
 
@@ -223,7 +223,7 @@ IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esqu
   "analisis_breve": "string",
   "consejo_nutricional": "string",
   "advertencias": ["string"],
-  "aviso_legal": "Las estimaciones nutricionales son orientativas. Consulte a un nutricionista profesional."
+  "aviso_legal": "LOS VALORES SON ESTIMACIONES BASADAS EN IA. Este análisis tiene fines orientativos y no considera necesidades metabólicas individuales. Para un plan nutricional seguro, consulte a un nutricionista certificado."
 }`;
 
 const LAB_ANALYSIS_PROMPT = `Actúas como un Bioquímico Clínico Experto. Tu misión es analizar imágenes o PDFs de estudios médicos de laboratorio.
@@ -251,7 +251,7 @@ IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido conforme a este esqu
     }
   ],
   "resumen_medico": "string",
-  "aviso_legal": "Consulta a tu médico para un diagnóstico definitivo."
+  "aviso_legal": "INTERPRETACIÓN PRELIMINAR GENERADA POR IA. Este informe no constituye un acto médico. Los resultados deben ser validados por un profesional de la salud titular. No modifique tratamientos basándose en este reporte."
 }`;
 
 export async function analyzeImage(

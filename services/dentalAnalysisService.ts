@@ -17,7 +17,7 @@ IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje de
 
 Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones cutáneas".
 
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un odontólogo para obtener un diagnóstico y tratamiento profesional."
+El aviso_legal SIEMPRE debe ser: "ANÁLISIS BIO-VISUAL PRELIMINAR GENERADO POR IA. Este reporte no es equivalente a un diagnóstico clínico profesional. Tiene el fin de orientar y facilitar la consulta odontológica. No ignore molestias persistentes."
 
 IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido. Está terminantemente prohibido incluir introducciones, explicaciones previas, comentarios o bloques de código markdown. 
 Responde ÚNICAMENTE con un JSON que cumpla estrictamente este esquema:

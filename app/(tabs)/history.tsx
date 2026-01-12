@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,63 @@ import {
   TouchableOpacity,
   Image,
   RefreshControl,
+  ScrollView,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Clock, ChevronRight, Inbox, Trash2, Pill } from 'lucide-react-native';
+import {
+  Clock,
+  ChevronRight,
+  Inbox,
+  Trash2,
+  Pill,
+  Sparkles,
+  Stethoscope,
+  Apple,
+  Microscope,
+  PlusCircle,
+  FileDown,
+  Circle,
+  CheckCircle2,
+  X
+} from 'lucide-react-native';
 import { useScanHistory } from '@/hooks/useScanHistory';
+import { UserService } from '@/services/userService';
+import { PDFService } from '@/services/pdfService';
+import { UserProfile } from '@/types/user';
 import Colors from '@/constants/colors';
-import { AnalysisResult, RiskLevel } from '@/types/analysis';
+import { AnalysisResult, RiskLevel, ScanType } from '@/types/analysis';
 import { MODULES } from '@/constants/modules';
-import { Alert } from 'react-native';
 import CategoryIcon from '@/components/shared/CategoryIcon';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+type FilterType = 'all' | 'medical' | 'medication' | 'nutrition' | 'lab_results';
+
+interface FilterChip {
+  id: FilterType;
+  label: string;
+  icon: any;
+}
+
+const FILTERS: FilterChip[] = [
+  { id: 'all', label: 'Todos', icon: Sparkles },
+  { id: 'medical', label: 'Médico', icon: Stethoscope },
+  { id: 'medication', label: 'Medicamentos', icon: Pill },
+  { id: 'nutrition', label: 'Nutrición', icon: Apple },
+  { id: 'lab_results', label: 'Análisis', icon: Microscope },
+];
+
+const MEDICAL_TYPES: ScanType[] = [
+  'skin', 'ocular', 'dental', 'posture', 'nails', 'wound',
+  'capillary', 'throat', 'veins', 'pediatrics', 'intimate', 'bites'
+];
 
 const getRiskColor = (risk: RiskLevel) => {
   switch (risk) {
@@ -48,9 +96,25 @@ const formatDate = (timestamp: number) => {
   });
 };
 
-function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: string) => void }) {
+function HistoryItem({
+  item,
+  onDelete,
+  isSelectionMode,
+  isSelected,
+  onToggleSelection
+}: {
+  item: AnalysisResult;
+  onDelete: (id: string) => void;
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onToggleSelection: (id: string) => void;
+}) {
   const handlePress = () => {
-    router.push({ pathname: '/result', params: { id: item.id } });
+    if (isSelectionMode) {
+      onToggleSelection(item.id);
+    } else {
+      router.push({ pathname: '/result', params: { id: item.id } });
+    }
   };
 
   const handleDelete = () => {
@@ -77,6 +141,15 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
       activeOpacity={0.7}
       testID={`history-item-${item.id}`}
     >
+      {isSelectionMode && (
+        <View style={styles.selectionIndicator}>
+          {isSelected ? (
+            <CheckCircle2 size={24} color={Colors.primary} fill={Colors.primary + '20'} />
+          ) : (
+            <Circle size={24} color={Colors.border} />
+          )}
+        </View>
+      )}
       <View style={styles.imageContainer}>
         {item.imageUri ? (
           <Image source={{ uri: item.imageUri }} style={styles.thumbnail} />
@@ -137,35 +210,159 @@ function HistoryItem({ item, onDelete }: { item: AnalysisResult; onDelete: (id: 
 
 export default function HistoryScreen() {
   const { history, isLoading, refresh, removeFromHistory } = useScanHistory();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const profile = await UserService.getProfile();
+      setUserProfile(profile);
+    };
+    loadProfile();
+  }, []);
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleGeneratePdf = async () => {
+    if (selectedIds.length === 0) return;
+
+    setIsGeneratingPdf(true);
+    try {
+      const selectedResults = history.filter(item => selectedIds.includes(item.id));
+      await PDFService.generateHistoryReport(selectedResults, userProfile);
+
+      // Reset after export
+      setIsSelectionMode(false);
+      setSelectedIds([]);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo generar el reporte PDF.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const filteredHistory = useMemo(() => {
+    switch (activeFilter) {
+      case 'medical':
+        return history.filter(item => MEDICAL_TYPES.includes(item.scanType));
+      case 'medication':
+        return history.filter(item => item.scanType === 'medication');
+      case 'nutrition':
+        return history.filter(item => item.scanType === 'nutrition');
+      case 'lab_results':
+        return history.filter(item => item.scanType === 'lab_results');
+      default:
+        return history;
+    }
+  }, [history, activeFilter]);
+
+  const handleFilterChange = (filterId: FilterType) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setActiveFilter(filterId);
+  };
+
+  const getFilterCategoryName = (id: FilterType) => {
+    return FILTERS.find(f => f.id === id)?.label || '';
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIconContainer}>
         <Inbox color={Colors.textMuted} size={48} />
       </View>
-      <Text style={styles.emptyTitle}>Sin escaneos</Text>
-      <Text style={styles.emptySubtitle}>
-        Los análisis que realices aparecerán aquí
+      <Text style={styles.emptyTitle}>
+        {activeFilter === 'all'
+          ? 'Sin escaneos'
+          : `No hay registros en ${getFilterCategoryName(activeFilter)}`}
       </Text>
+      <Text style={styles.emptySubtitle}>
+        {activeFilter === 'all'
+          ? 'Los análisis que realices aparecerán aquí'
+          : `Aún no tienes registros en esta categoría`}
+      </Text>
+      <TouchableOpacity
+        style={styles.emptyAction}
+        onPress={() => router.push('/(tabs)/(home)')}
+      >
+        <PlusCircle size={20} color={Colors.primary} />
+        <Text style={styles.emptyActionText}>Realizar primer escaneo</Text>
+      </TouchableOpacity>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Historial</Text>
-        <Text style={styles.headerSubtitle}>
-          {history.length} {history.length === 1 ? 'escaneo' : 'escaneos'} guardados
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>Historial</Text>
+          <TouchableOpacity
+            style={[styles.selectToggle, isSelectionMode && styles.selectToggleActive]}
+            onPress={() => {
+              setIsSelectionMode(!isSelectionMode);
+              setSelectedIds([]);
+            }}
+          >
+            {isSelectionMode ? (
+              <X size={18} color={Colors.text} />
+            ) : (
+              <Text style={styles.selectToggleText}>Seleccionar</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterContainer}
+        >
+          {FILTERS.map((filter) => {
+            const Icon = filter.icon;
+            const isActive = activeFilter === filter.id;
+            return (
+              <TouchableOpacity
+                key={filter.id}
+                style={[
+                  styles.filterChip,
+                  isActive && styles.filterChipActive
+                ]}
+                onPress={() => handleFilterChange(filter.id)}
+                activeOpacity={0.8}
+              >
+                <Icon size={16} color={isActive ? '#FFF' : Colors.textSecondary} />
+                <Text style={[
+                  styles.filterLabel,
+                  isActive && styles.filterLabelActive
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        <Text style={styles.resultsCount}>
+          Mostrando {filteredHistory.length} resultados de {getFilterCategoryName(activeFilter)}
         </Text>
       </View>
 
       <FlatList
-        data={history}
+        data={filteredHistory}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <HistoryItem
             item={item}
             onDelete={removeFromHistory}
+            isSelectionMode={isSelectionMode}
+            isSelected={selectedIds.includes(item.id)}
+            onToggleSelection={toggleSelection}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -179,6 +376,28 @@ export default function HistoryScreen() {
         }
         showsVerticalScrollIndicator={false}
       />
+
+      {isSelectionMode && selectedIds.length > 0 && (
+        <View style={[styles.fabContainer, { bottom: 20 }]}>
+          <TouchableOpacity
+            style={styles.pdfFab}
+            onPress={handleGeneratePdf}
+            disabled={isGeneratingPdf}
+            activeOpacity={0.9}
+          >
+            {isGeneratingPdf ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <FileDown size={20} color="#FFF" />
+                <Text style={styles.pdfFabText}>
+                  Generar Reporte PDF ({selectedIds.length})
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -189,22 +408,73 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    paddingHorizontal: 20,
     paddingTop: 60,
-    paddingBottom: 16,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: '700' as const,
     color: Colors.text,
-    marginBottom: 4,
   },
-  headerSubtitle: {
+  selectToggle: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceAlt,
+  },
+  selectToggleActive: {
+    backgroundColor: Colors.surfaceAlt,
+  },
+  selectToggleText: {
     fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  filterScroll: {
+    paddingBottom: 12,
+  },
+  filterContainer: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  filterChipActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  filterLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
     color: Colors.textSecondary,
+  },
+  filterLabelActive: {
+    color: '#FFF',
+  },
+  resultsCount: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+    fontWeight: '500',
   },
   listContent: {
     padding: 20,
@@ -222,6 +492,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  selectionIndicator: {
+    marginRight: 12,
   },
   imageContainer: {
     position: 'relative',
@@ -322,10 +597,54 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: Colors.text,
     marginBottom: 8,
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
   emptySubtitle: {
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'center',
+    paddingHorizontal: 40,
+    marginBottom: 20,
+  },
+  emptyAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.primary + '15',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  emptyActionText: {
+    color: Colors.primary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  fabContainer: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+  },
+  pdfFab: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
+    gap: 10,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  pdfFabText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
+

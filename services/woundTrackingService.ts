@@ -20,7 +20,7 @@ IMPORTANTE: Mantén un tono clínico, empático y cauteloso. NO uses lenguaje de
 
 Para analisis_abcde_detalle, responde "N/A - Criterio específico para lesiones cutáneas".
 
-El aviso_legal SIEMPRE debe ser: "ESTA HERRAMIENTA NO PROPORCIONA UN DIAGNÓSTICO MÉDICO. Su propósito es puramente informativo y educativo. Es obligatorio consultar a un médico para obtener un diagnóstico y tratamiento profesional. Si observas signos de infección grave, busca atención médica inmediata."
+El aviso_legal SIEMPRE debe ser: "SEGUIMIENTO DE HERIDAS BASADO EN IA. Este reporte es puramente orientativo y no constituye un diagnóstico clínico. Es obligatorio consultar a un médico o cirujano para el tratamiento de heridas. Busque atención inmediata ante fiebre o secreción purulenta."
 
 IMPORTANTE: Responde ÚNICAMENTE con un objeto JSON válido. Está terminantemente prohibido incluir introducciones, explicaciones previas, comentarios o bloques de código markdown. 
 Responde ÚNICAMENTE con un JSON que cumpla estrictamente este esquema:

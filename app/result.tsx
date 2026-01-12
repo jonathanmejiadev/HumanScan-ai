@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    paddingBottom: 120,
+    paddingBottom: 180, // Increased to account for taller bottom actions
   },
   imageSection: {
     position: 'relative',
