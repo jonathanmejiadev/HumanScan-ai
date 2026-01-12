@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw } from 'lucide-react-native';
+import { Camera, ImageIcon, X, Scan, Eye, AlertCircle, CheckCircle, RotateCcw, ShieldAlert } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation } from '@tanstack/react-query';
 import Colors from '@/constants/colors';
@@ -59,6 +59,9 @@ export default function ScanScreen() {
       console.error('[ScanScreen] Analysis failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 
+      // No mostrar alerta si es un error de seguridad, se maneja en la UI
+      if (errorMessage.includes('políticas de seguridad')) return;
+
       Alert.alert(
         'Error de Análisis',
         errorMessage,
@@ -66,6 +69,9 @@ export default function ScanScreen() {
       );
     },
   });
+
+  const isSafetyError = analysisMutation.error instanceof Error &&
+    analysisMutation.error.message.includes('políticas de seguridad');
 
   // Manejar imagen recibida por parámetros (Skip camera flow)
   useEffect(() => {
@@ -167,6 +173,50 @@ export default function ScanScreen() {
             </Text>
           </LinearGradient>
         </View>
+
+        {scanType === 'intimate' && !imageUri && (
+          <View style={styles.intimateNotice}>
+            <AlertCircle color={Colors.primary} size={20} />
+            <Text style={styles.intimateNoticeText}>
+              Nota: Debido a filtros automáticos de seguridad, intenta que la foto sea lo más específica posible sobre la afección.
+            </Text>
+          </View>
+        )}
+
+        {isSafetyError && (
+          <View style={styles.safetyTipsContainer}>
+            <View style={styles.safetyTipsHeader}>
+              <ShieldAlert color={Colors.riskHigh} size={20} />
+              <Text style={styles.safetyTipsTitle}>Consejos de Captura (Políticas IA)</Text>
+            </View>
+            <Text style={styles.safetyTipsSubtitle}>
+              La IA ha bloqueado la imagen por seguridad. Intenta lo siguiente:
+            </Text>
+            <View style={styles.tipList}>
+              <View style={styles.tipItem}>
+                <CheckCircle color={Colors.secondary} size={14} />
+                <Text style={styles.tipText}><Text style={{ fontWeight: 'bold' }}>Acércate más:</Text> Enfoca la lesión de cerca (macro).</Text>
+              </View>
+              <View style={styles.tipItem}>
+                <CheckCircle color={Colors.secondary} size={14} />
+                <Text style={styles.tipText}><Text style={{ fontWeight: 'bold' }}>Iluminación:</Text> Evita sombras y usa luz clara.</Text>
+              </View>
+              <View style={styles.tipItem}>
+                <CheckCircle color={Colors.secondary} size={14} />
+                <Text style={styles.tipText}><Text style={{ fontWeight: 'bold' }}>Privacidad:</Text> Menos contexto genital ayuda a evitar filtros restrictivos.</Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => {
+                resetImage();
+                analysisMutation.reset();
+              }}
+            >
+              <Text style={styles.retryButtonText}>Intentar con otra foto</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {imageUri ? (
           <View style={styles.previewContainer}>
@@ -416,5 +466,63 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: Colors.textInverse,
+  },
+  intimateNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F9FF',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 24,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+  },
+  intimateNoticeText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0369A1',
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  safetyTipsContainer: {
+    backgroundColor: '#FEF2F2',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  safetyTipsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  safetyTipsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#991B1B',
+  },
+  safetyTipsSubtitle: {
+    fontSize: 14,
+    color: '#B91C1C',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  tipList: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });

@@ -9,7 +9,7 @@ const analysisSchema = z.object({
   hallazgos_principales: z.array(z.string()).describe('Lista de condiciones potenciales identificadas'),
   triaje_riesgo: z.enum(['Bajo', 'Medio', 'Alto', 'Emergencia']).describe('Nivel de riesgo del triaje'),
   analisis_abcde_detalle: z.string().describe('Análisis ABCDE específico para lunares, o N/A si no aplica'),
-  especialista_recomendado: z.enum(['Dermatólogo', 'Oftalmólogo', 'Médico General', 'Odontólogo', 'Fisioterapeuta', 'Traumatólogo', 'Cirujano']).describe('Tipo de especialista recomendado'),
+  especialista_recomendado: z.enum(['Dermatólogo', 'Oftalmólogo', 'Médico General', 'Odontólogo', 'Fisioterapeuta', 'Traumatólogo', 'Cirujano', 'Pediatra', 'Urólogo', 'Ginecólogo']).describe('Tipo de especialista recomendado'),
   guia_de_consulta: z.array(z.string()).min(3).max(3).describe('3 preguntas específicas que el usuario debe hacerle al médico'),
   pasos_a_seguir: z.string().describe('Instrucciones preventivas detalladas'),
   aviso_legal: z.string().describe('Aviso legal obligatorio'),
@@ -100,6 +100,54 @@ IMPORTANTE: Responde ÚNICAMENTE con un JSON válido que siga exactamente esta e
   "aviso_legal": "string"
 }`;
 
+const CAPILLARY_ANALYSIS_PROMPT = `Actúas como un experto en salud capilar. Analiza la imagen del cuero cabelludo o cabello buscando:
+1. Densidad folicular y zonas de adelgazamiento.
+2. Salud del cuero cabelludo (rojeces, descamación, caspa, sebo).
+3. Línea capilar y patrones de retroceso.
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Dermatólogo.`;
+
+const THROAT_ANALYSIS_PROMPT = `Actúas como un asistente de salud especializado en otorrinolaringología. Analiza la imagen de la garganta buscando:
+1. Estado de amígdalas (inflamación, tamaño, presencia de placas blanquecinas).
+2. Úvula y faringe posterior (coloración, irritación).
+3. Signos de infección viral o bacteriana sugeridos visualmente.
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Médico General.`;
+
+const VEINS_ANALYSIS_PROMPT = `Actúas como especialista en salud vascular. Analiza la imagen de las piernas buscando:
+1. Venas dilatadas o tortuosas (varices).
+2. Arañitas vasculares (telangiectasias).
+3. Cambios en la coloración de la piel o signos de inflamación/edema.
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Traumatólogo o Cirujano.`;
+
+const PEDIATRICS_ANALYSIS_PROMPT = `Actúas como pediatra experto en dermatología infantil. Analiza la imagen buscando:
+1. Tipo de exantema o brote (distribución, forma, color).
+2. Signos compatibles con varicela, sarampión u otras enfermedades eruptivas.
+3. Reacciones alérgicas comunes en niños.
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Pediatra.`;
+
+const INTIMATE_ANALYSIS_PROMPT = `Actúas como un asistente médico profesional y discreto para salud íntima. Analiza la imagen buscando:
+1. Presencia de verrugas, llagas o úlceras.
+2. Protuberancias inusuales o irritaciones severas.
+3. Cambios en la mucosa que requieran atención inmediata.
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Médico General, Ginecólogo o Urólogo.`;
+
+const BITES_ANALYSIS_PROMPT = `Actúas como experto en toxicología y dermatología. Analiza la imagen de la picadura buscando:
+1. Punto central de picada y patrón (única, múltiple, lineal).
+2. Reacción inflamatoria (eritema, edema, ampollas).
+3. Signos de alarma (necrosis, expansión rápida del halo).
+
+Genera un reporte técnico siguiendo el formato JSON especificado.
+Especialista recomendado: Médico General.`;
+
 export async function analyzeImage(
   imageBase64: string,
   scanType: ScanType
@@ -124,6 +172,24 @@ export async function analyzeImage(
       break;
     case 'wound':
       prompt = WOUND_ANALYSIS_PROMPT;
+      break;
+    case 'capillary':
+      prompt = CAPILLARY_ANALYSIS_PROMPT;
+      break;
+    case 'throat':
+      prompt = THROAT_ANALYSIS_PROMPT;
+      break;
+    case 'veins':
+      prompt = VEINS_ANALYSIS_PROMPT;
+      break;
+    case 'pediatrics':
+      prompt = PEDIATRICS_ANALYSIS_PROMPT;
+      break;
+    case 'intimate':
+      prompt = INTIMATE_ANALYSIS_PROMPT;
+      break;
+    case 'bites':
+      prompt = BITES_ANALYSIS_PROMPT;
       break;
     default:
       prompt = SKIN_ANALYSIS_PROMPT;
@@ -195,10 +261,24 @@ export async function analyzeImage(
       throw new Error('INVALID_RESPONSE');
     }
 
-    // Verificar errores en la respuesta de la API
+    // Probar si el objeto data tiene la estructura esperada de error de la API
     if (data.error) {
       console.error('[AnalysisService] API Error:', data.error);
       throw new Error('API_ERROR');
+    }
+
+    // Verificar bloqueos de seguridad o contenido de Gemini (Hard block en metadatos)
+    const blockReason = data.promptFeedback?.blockReason;
+    const finishReason = data.candidates?.[0]?.finishReason;
+
+    const safetyBlocked = !!blockReason ||
+      finishReason === 'SAFETY' ||
+      finishReason === 'OTHER' ||
+      data.candidates?.[0]?.safetyRatings?.some((r: any) => r.blocked);
+
+    if (safetyBlocked) {
+      console.warn('[AnalysisService] Content block detected:', blockReason || finishReason);
+      throw new Error('SAFETY_BLOCK');
     }
 
     // Validar que existan candidatos y contenido
@@ -216,12 +296,23 @@ export async function analyzeImage(
 
     // Parsear el JSON de la respuesta (puede venir con markdown code blocks)
     let jsonText = text.trim().replace(/^```json\s*/, '').replace(/\s*```$/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+
+    // Verificar si el texto parece ser una negativa en lugar de un JSON
+    const refusalPhrases = ['no puedo', 'políticas', 'seguridad', 'disculpas', 'I cannot', 'I am sorry', 'safety policies'];
+    if (!jsonText.startsWith('{') && refusalPhrases.some(phrase => jsonText.toLowerCase().includes(phrase))) {
+      console.warn('[AnalysisService] AI refusal detected in text content');
+      throw new Error('SAFETY_BLOCK');
+    }
+
     let parsedResult;
     try {
       parsedResult = JSON.parse(jsonText);
     } catch (jsonError: any) {
-      console.error('[AnalysisService] JSON parse error:', jsonError);
-      console.error('[AnalysisService] Response text:', jsonText.substring(0, 500));
+      console.error('[AnalysisService] JSON parse error. Text received:', text.substring(0, 200));
+      // Si el parseo falla y el tipo de escaneo es íntimo, es muy probable que sea un bloqueo de seguridad implícito
+      if (scanType === 'intimate' || scanType === 'pediatrics') {
+        throw new Error('SAFETY_BLOCK');
+      }
       throw new Error('INVALID_RESPONSE');
     }
 
@@ -253,6 +344,10 @@ export async function analyzeImage(
 
     if (errorMessage === 'API_ERROR') {
       throw new Error('Hubo un problema con el servicio de análisis. Por favor, intenta nuevamente.');
+    }
+
+    if (errorMessage === 'SAFETY_BLOCK') {
+      throw new Error('No se pudo procesar la imagen por políticas de seguridad de la IA. Para el análisis de salud íntima, asegúrate de enfocar únicamente la zona afectada, con luz natural y evitando mostrar más contexto del necesario.');
     }
 
     if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('Network')) {
