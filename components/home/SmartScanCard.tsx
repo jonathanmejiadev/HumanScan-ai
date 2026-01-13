@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { ChevronRight, Search } from 'lucide-react-native';
+import { ChevronRight, SearchCheck } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface SmartScanCardProps {
@@ -38,7 +38,7 @@ export default function SmartScanCard({ onPress }: SmartScanCardProps) {
 
                 {/* Decorative Elements */}
                 <View style={styles.decorativeIcon}>
-                    <Search size={54} color="rgba(255, 255, 255, 0.2)" strokeWidth={2.5} />
+                    <SearchCheck size={48} color="rgba(255, 255, 255, 0.25)" strokeWidth={1.5} />
                 </View>
             </LinearGradient>
         </TouchableOpacity>
@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
     },
     decorativeIcon: {
         position: 'absolute',
-        right: 0,
-        top: 0,
+        right: 15,
+        top: 15,
         zIndex: 1,
-        transform: [{ rotate: '15deg' }, { translateX: 5 }, { translateY: -5 }],
+        transform: [{ rotate: '10deg' }],
     },
 });
