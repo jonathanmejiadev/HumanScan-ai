@@ -27,6 +27,7 @@ import { useScanHistory } from '@/hooks/useScanHistory';
 import { ScanType, AnalysisResult } from '@/types/analysis';
 
 import { MODULES } from '@/constants/modules';
+import CategoryIcon from '@/components/shared/CategoryIcon';
 
 const SPECIALTY_TIPS: Record<string, string> = {
   skin: "Ej: Lo tengo hace años, no ha cambiado...",
@@ -205,20 +206,20 @@ export default function ScanScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.typeIndicator}>
-          <LinearGradient
-            colors={[moduleConfig.color, moduleConfig.color]}
-            style={styles.typeGradient}
-          >
-            <View style={[styles.typeIcon, { backgroundColor: moduleConfig.accentColor }]}>
-              <Scan color={Colors.textInverse} size={24} />
+          <View style={[styles.identityBar, { backgroundColor: moduleConfig.accentColor }]} />
+          <View style={styles.typeContent}>
+            <View style={[styles.typeIconContainer, { borderColor: moduleConfig.accentColor + '20' }]}>
+              <CategoryIcon scanType={scanType} color={moduleConfig.accentColor} size={32} />
             </View>
-            <Text style={styles.typeTitle}>
-              {moduleConfig.name}
-            </Text>
-            <Text style={styles.typeDescription}>
-              {moduleConfig.instructions}
-            </Text>
-          </LinearGradient>
+            <View style={styles.typeTextWrapper}>
+              <Text style={styles.typeTitle}>
+                {moduleConfig.name}
+              </Text>
+              <Text style={styles.typeDescription}>
+                {moduleConfig.instructions}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {scanType === 'intimate' && !imageUri && (
@@ -300,40 +301,46 @@ export default function ScanScreen() {
         ) : (
           <View style={styles.captureSection}>
             <TouchableOpacity
-              style={styles.captureButton}
+              style={styles.captureCard}
               onPress={() => pickImage(true)}
               activeOpacity={0.8}
             >
-              <View style={styles.captureIconContainer}>
-                <Camera color={Colors.primary} size={32} />
+              <View style={styles.captureIconBase}>
+                <Camera color={Colors.primary} size={28} />
               </View>
-              <Text style={styles.captureButtonTitle}>Usar Cámara</Text>
-              <Text style={styles.captureButtonSubtitle}>Tomar foto ahora</Text>
+              <View style={styles.captureText}>
+                <Text style={styles.captureCardTitle}>Uso de Cámara</Text>
+                <Text style={styles.captureCardSubtitle}>Tomar foto ahora</Text>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.captureButton}
+              style={styles.captureCard}
               onPress={() => pickImage(false)}
               activeOpacity={0.8}
             >
-              <View style={styles.captureIconContainer}>
-                <ImageIcon color={Colors.primary} size={32} />
+              <View style={styles.captureIconBase}>
+                <ImageIcon color={Colors.primary} size={28} />
               </View>
-              <Text style={styles.captureButtonTitle}>Galería</Text>
-              <Text style={styles.captureButtonSubtitle}>Seleccionar imagen</Text>
+              <View style={styles.captureText}>
+                <Text style={styles.captureCardTitle}>Galería</Text>
+                <Text style={styles.captureCardSubtitle}>Seleccionar imagen</Text>
+              </View>
             </TouchableOpacity>
 
             {scanType === 'lab_results' && (
               <TouchableOpacity
-                style={styles.captureButton}
+                style={styles.captureCard}
                 onPress={pickDocument}
                 activeOpacity={0.8}
               >
-                <View style={styles.captureIconContainer}>
-                  <FileText color={Colors.primary} size={32} />
+                <View style={styles.captureIconBase}>
+                  <FileText color={Colors.primary} size={28} />
                 </View>
-                <Text style={styles.captureButtonTitle}>Subir PDF</Text>
-                <Text style={styles.captureButtonSubtitle}>Seleccionar archivo</Text>
+                <View style={styles.captureText}>
+                  <Text style={styles.captureCardTitle}>Subir PDF</Text>
+                  <Text style={styles.captureCardSubtitle}>Seleccionar archivo</Text>
+                </View>
               </TouchableOpacity>
             )}
           </View>
@@ -411,124 +418,137 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   typeIndicator: {
+    backgroundColor: Colors.surface,
+    borderRadius: 24,
     marginBottom: 24,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  typeGradient: {
-    borderRadius: 20,
-    padding: 24,
+  identityBar: {
+    width: 6,
+    height: '100%',
+  },
+  typeContent: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    padding: 20,
+    gap: 16,
   },
-  typeIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+  typeIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    borderWidth: 1.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 1,
+  },
+  typeTextWrapper: {
+    flex: 1,
   },
   typeTitle: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.text,
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#111827',
     marginBottom: 4,
   },
   typeDescription: {
     fontSize: 14,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  previewContainer: {
-    position: 'relative',
-    marginBottom: 24,
-  },
-  previewImage: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 20,
-    backgroundColor: Colors.surfaceAlt,
-  },
-  resetButton: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.overlay,
-    alignItems: 'center',
-    justifyContent: 'center',
+    color: '#4B5563',
+    lineHeight: 20,
   },
   captureSection: {
-    flexDirection: 'row',
-    gap: 16,
+    gap: 12,
     marginBottom: 24,
   },
-  captureButton: {
-    flex: 1,
+  captureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
     elevation: 2,
+    gap: 16,
   },
-  captureIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.surfaceAlt,
+  captureIconBase: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#EEF2FF', // Indigo PrimaryLight
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
   },
-  captureButtonTitle: {
+  captureText: {
+    flex: 1,
+  },
+  captureCardTitle: {
     fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 4,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 2,
   },
-  captureButtonSubtitle: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+  captureCardSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
   },
   tipsSection: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
+    padding: 20,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   tipsTitle: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginBottom: 12,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 16,
   },
   tipItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
+    gap: 12,
+    marginBottom: 10,
   },
   tipText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    fontSize: 14,
+    color: '#4B5563',
   },
   warningBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: Colors.warningBg,
-    padding: 14,
-    borderRadius: 12,
-    gap: 10,
+    backgroundColor: '#FFFBEB',
+    padding: 16,
+    borderRadius: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#FEF3C7',
   },
   warningText: {
     flex: 1,
-    fontSize: 12,
-    color: Colors.text,
-    lineHeight: 18,
+    fontSize: 13,
+    color: '#92400E',
+    lineHeight: 20,
   },
   bottomActions: {
     position: 'absolute',
@@ -536,26 +556,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 20,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
     backgroundColor: Colors.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: Colors.borderLight,
   },
   analyzeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.primary,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 18,
+    borderRadius: 20,
     gap: 10,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
   },
   analyzeButtonDisabled: {
     backgroundColor: Colors.textMuted,
+    shadowOpacity: 0,
   },
   analyzeButtonText: {
     fontSize: 16,
-    fontWeight: '600' as const,
+    fontWeight: '700',
     color: Colors.textInverse,
   },
   intimateNotice: {
@@ -618,16 +644,16 @@ const styles = StyleSheet.create({
   },
   notesContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 24,
+    padding: 20,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.borderLight,
     shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
   notesHeader: {
     flexDirection: 'row',
@@ -636,24 +662,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   notesTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
   },
   notesInput: {
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    padding: 14,
     fontSize: 14,
     color: Colors.text,
-    minHeight: 80,
+    minHeight: 100,
     textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   notesIndicator: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.secondary,
-    marginTop: 8,
-    fontWeight: '600',
+    marginTop: 10,
+    fontWeight: '700',
     textAlign: 'right',
   },
 });
