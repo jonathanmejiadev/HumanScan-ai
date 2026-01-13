@@ -40,16 +40,10 @@ export default function AllCategoriesScreen() {
                     style={styles.backButton}
                     activeOpacity={0.7}
                 >
-                    <ArrowLeft size={24} color="#1F2937" />
+                    <ArrowLeft size={24} color="#111827" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Especialidades de Análisis</Text>
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={styles.closeButton}
-                    activeOpacity={0.7}
-                >
-                    <X size={20} color="#9CA3AF" />
-                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Especialidades</Text>
+                <View style={{ width: 40 }} />
             </View>
 
             <FlatList
@@ -78,34 +72,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        paddingBottom: 20,
+        backgroundColor: '#F9FAFB',
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#F3F4F6',
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 1,
     },
     headerTitle: {
         flex: 1,
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 20,
+        fontWeight: '800',
         color: '#111827',
         textAlign: 'center',
-        marginHorizontal: 8,
-    },
-    closeButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#F3F4F6',
     },
     listContent: {
         padding: 20,
