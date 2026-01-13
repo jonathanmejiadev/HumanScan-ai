@@ -10,6 +10,7 @@ import {
     Alert,
     ActivityIndicator,
     Platform,
+    ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
@@ -124,7 +125,7 @@ export default function UniversalScannerScreen() {
     });
 
     return (
-        <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 20) }]}>
+        <View style={styles.container}>
             <Stack.Screen options={{ headerShown: false }} />
 
             {/* Header Toolbar */}
@@ -136,91 +137,99 @@ export default function UniversalScannerScreen() {
                 <View style={{ width: 40 }} />
             </View>
 
-            {/* Main Surface */}
-            <View style={styles.cameraSurface}>
-                {imageUri ? (
-                    <View style={styles.previewWrapper}>
-                        <Image source={{ uri: imageUri }} style={styles.previewImage} />
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    { paddingBottom: Math.max(insets.bottom, 40) }
+                ]}
+            >
+                {/* Main Surface */}
+                <View style={styles.cameraSurface}>
+                    {imageUri ? (
+                        <View style={styles.previewWrapper}>
+                            <Image source={{ uri: imageUri }} style={styles.previewImage} />
 
-                        {status === 'identifying' && (
-                            <>
-                                <Animated.View style={[styles.scanLine, { top: translateY }]} />
-                                <BlurView intensity={20} style={StyleSheet.absoluteFill} />
-                            </>
-                        )}
+                            {status === 'identifying' && (
+                                <>
+                                    <Animated.View style={[styles.scanLine, { top: translateY }]} />
+                                    <BlurView intensity={20} style={StyleSheet.absoluteFill} />
+                                </>
+                            )}
 
-                        {/* Visual Markers overlay */}
-                        <View style={styles.markersContainer}>
-                            <View style={[styles.corner, styles.topLeft]} />
-                            <View style={[styles.corner, styles.topRight]} />
-                            <View style={[styles.corner, styles.bottomLeft]} />
-                            <View style={[styles.corner, styles.bottomRight]} />
+                            {/* Visual Markers overlay */}
+                            <View style={styles.markersContainer}>
+                                <View style={[styles.corner, styles.topLeft]} />
+                                <View style={[styles.corner, styles.topRight]} />
+                                <View style={[styles.corner, styles.bottomLeft]} />
+                                <View style={[styles.corner, styles.bottomRight]} />
+                            </View>
                         </View>
-                    </View>
-                ) : (
-                    <TouchableOpacity style={styles.placeholderGrid} onPress={handlePickImage}>
-                        <Search size={48} color={Colors.textMuted} />
-                        <Text style={styles.placeholderText}>Toca para iniciar visión IA</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-
-            {/* AI Feedback Panel */}
-            <View style={styles.feedbackPanel}>
-                <View style={styles.statusIndicator}>
-                    <Activity size={20} color={status === 'identifying' ? Colors.primary : Colors.secondary} />
-                    <Text style={styles.statusText}>{displayText}</Text>
+                    ) : (
+                        <TouchableOpacity style={styles.placeholderGrid} onPress={handlePickImage}>
+                            <Search size={48} color={Colors.textMuted} />
+                            <Text style={styles.placeholderText}>Toca para iniciar visión IA</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
-                {status === 'detected' && classification && (
-                    <Animated.View style={styles.resultDetails}>
-                        <LinearGradient
-                            colors={['#F0FDFA', '#F8FAFC']}
-                            style={styles.resultCard}
-                        >
-                            <View style={styles.resultHeader}>
-                                <ShieldCheck size={24} color={Colors.primary} />
-                                <Text style={styles.resultTitle}>Predicción IA</Text>
-                            </View>
+                {/* AI Feedback Panel */}
+                <View style={styles.feedbackPanel}>
+                    <View style={styles.statusIndicator}>
+                        <Activity size={20} color={status === 'identifying' ? Colors.primary : Colors.secondary} />
+                        <Text style={styles.statusText}>{displayText}</Text>
+                    </View>
 
-                            <Text style={styles.detectedLabel}>
-                                {classification.detectedZone} ({(classification.confidence * 100).toFixed(0)}% confianza)
-                            </Text>
-
-                            <View style={styles.findingsContainer}>
-                                {classification.findings.map((f, i) => (
-                                    <View key={i} style={styles.findingItem}>
-                                        <View style={styles.findingDot} />
-                                        <Text style={styles.findingText}>{f}</Text>
-                                    </View>
-                                ))}
-                            </View>
-
-                            <TouchableOpacity
-                                style={styles.deepAnalysisButton}
-                                onPress={handleGoToDeepAnalysis}
+                    {status === 'detected' && classification && (
+                        <Animated.View style={styles.resultDetails}>
+                            <LinearGradient
+                                colors={['#F0FDFA', '#F8FAFC']}
+                                style={styles.resultCard}
                             >
-                                <LinearGradient
-                                    colors={[Colors.primary, Colors.primaryDark]}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 0 }}
-                                    style={styles.gradientButton}
-                                >
-                                    <Text style={styles.buttonText}>Ir a análisis profundo</Text>
-                                    <ChevronRight size={18} color="#FFFFFF" />
-                                </LinearGradient>
-                            </TouchableOpacity>
-                        </LinearGradient>
-                    </Animated.View>
-                )}
+                                <View style={styles.resultHeader}>
+                                    <ShieldCheck size={24} color={Colors.primary} />
+                                    <Text style={styles.resultTitle}>Predicción IA</Text>
+                                </View>
 
-                {status === 'idle' && (
-                    <TouchableOpacity style={styles.primaryActionButton} onPress={handlePickImage}>
-                        <CameraIcon size={24} color="#FFFFFF" strokeWidth={2.5} />
-                        <Text style={styles.actionButtonText}>Capturar Imagen</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
+                                <Text style={styles.detectedLabel}>
+                                    {classification.detectedZone} ({(classification.confidence * 100).toFixed(0)}% confianza)
+                                </Text>
+
+                                <View style={styles.findingsContainer}>
+                                    {classification.findings.map((f, i) => (
+                                        <View key={i} style={styles.findingItem}>
+                                            <View style={styles.findingDot} />
+                                            <Text style={styles.findingText}>{f}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+
+                                <TouchableOpacity
+                                    style={styles.deepAnalysisButton}
+                                    onPress={handleGoToDeepAnalysis}
+                                >
+                                    <LinearGradient
+                                        colors={[Colors.primary, Colors.primaryDark]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 1, y: 0 }}
+                                        style={styles.gradientButton}
+                                    >
+                                        <Text style={styles.buttonText}>Ir a análisis profundo</Text>
+                                        <ChevronRight size={18} color="#FFFFFF" />
+                                    </LinearGradient>
+                                </TouchableOpacity>
+                            </LinearGradient>
+                        </Animated.View>
+                    )}
+
+                    {status === 'idle' && (
+                        <TouchableOpacity style={styles.primaryActionButton} onPress={handlePickImage}>
+                            <CameraIcon size={24} color="#FFFFFF" strokeWidth={2.5} />
+                            <Text style={styles.actionButtonText}>Capturar Imagen</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </ScrollView>
         </View>
     );
 }
@@ -255,6 +264,12 @@ const styles = StyleSheet.create({
         color: Colors.text,
         fontSize: 18,
         fontWeight: '700',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingVertical: 10,
     },
     cameraSurface: {
         width: width * 0.85,
@@ -342,8 +357,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     feedbackPanel: {
-        flex: 1,
-        marginTop: 40,
+        marginTop: 30,
         paddingHorizontal: 20,
     },
     statusIndicator: {
@@ -366,7 +380,6 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     resultDetails: {
-        flex: 1,
     },
     resultCard: {
         padding: 20,
