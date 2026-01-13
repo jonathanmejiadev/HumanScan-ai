@@ -306,10 +306,9 @@ export default function ScanScreen() {
               activeOpacity={0.8}
             >
               <View style={styles.captureIconContainer}>
-                <Camera color={Colors.primary} size={32} />
+                <Camera color={Colors.primary} size={26} />
               </View>
-              <Text style={styles.captureButtonTitle}>Usar Cámara</Text>
-              <Text style={styles.captureButtonSubtitle}>Tomar foto ahora</Text>
+              <Text style={styles.captureButtonTitle}>Cámara</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -318,10 +317,9 @@ export default function ScanScreen() {
               activeOpacity={0.8}
             >
               <View style={styles.captureIconContainer}>
-                <ImageIcon color={Colors.primary} size={32} />
+                <ImageIcon color={Colors.primary} size={26} />
               </View>
               <Text style={styles.captureButtonTitle}>Galería</Text>
-              <Text style={styles.captureButtonSubtitle}>Seleccionar imagen</Text>
             </TouchableOpacity>
 
             {scanType === 'lab_results' && (
@@ -331,10 +329,9 @@ export default function ScanScreen() {
                 activeOpacity={0.8}
               >
                 <View style={styles.captureIconContainer}>
-                  <FileText color={Colors.primary} size={32} />
+                  <FileText color={Colors.primary} size={26} />
                 </View>
-                <Text style={styles.captureButtonTitle}>Subir PDF</Text>
-                <Text style={styles.captureButtonSubtitle}>Seleccionar archivo</Text>
+                <Text style={styles.captureButtonTitle}>PDF</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -475,14 +472,15 @@ const styles = StyleSheet.create({
   },
   captureSection: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 10,
     marginBottom: 24,
   },
   captureButton: {
     flex: 1,
     backgroundColor: Colors.surface,
     borderRadius: 20,
-    padding: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: 'center',
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
@@ -493,24 +491,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
   },
   captureIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#EEF2FF', // Indigo PrimaryLight
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#6366F11A', // 10% opacity Indigo Primary
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
   },
   captureButtonTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#111827',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  captureButtonSubtitle: {
-    fontSize: 12,
-    color: '#6B7280',
+    marginTop: 8,
     textAlign: 'center',
   },
   tipsSection: {
