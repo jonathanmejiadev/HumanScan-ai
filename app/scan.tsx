@@ -206,20 +206,20 @@ export default function ScanScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <View style={styles.typeIndicator}>
-          <View style={[styles.identityBar, { backgroundColor: moduleConfig.accentColor }]} />
-          <View style={styles.typeContent}>
-            <View style={[styles.typeIconContainer, { borderColor: moduleConfig.accentColor + '20' }]}>
-              <CategoryIcon scanType={scanType} color={moduleConfig.accentColor} size={32} />
+          <LinearGradient
+            colors={[moduleConfig.color, moduleConfig.color]}
+            style={styles.typeGradient}
+          >
+            <View style={[styles.typeIcon, { backgroundColor: moduleConfig.accentColor }]}>
+              <CategoryIcon scanType={scanType} color={Colors.textInverse} size={28} />
             </View>
-            <View style={styles.typeTextWrapper}>
-              <Text style={styles.typeTitle}>
-                {moduleConfig.name}
-              </Text>
-              <Text style={styles.typeDescription}>
-                {moduleConfig.instructions}
-              </Text>
-            </View>
-          </View>
+            <Text style={styles.typeTitle}>
+              {moduleConfig.name}
+            </Text>
+            <Text style={styles.typeDescription}>
+              {moduleConfig.instructions}
+            </Text>
+          </LinearGradient>
         </View>
 
         {scanType === 'intimate' && !imageUri && (
@@ -418,56 +418,31 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   typeIndicator: {
-    backgroundColor: Colors.surface,
-    borderRadius: 24,
     marginBottom: 24,
-    flexDirection: 'row',
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    shadowColor: Colors.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.8,
-    shadowRadius: 10,
-    elevation: 2,
   },
-  identityBar: {
-    width: 6,
-    height: '100%',
-  },
-  typeContent: {
-    flex: 1,
-    flexDirection: 'row',
+  typeGradient: {
+    borderRadius: 20,
+    padding: 24,
     alignItems: 'center',
-    padding: 20,
-    gap: 16,
   },
-  typeIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.surface,
+  typeIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 1,
-  },
-  typeTextWrapper: {
-    flex: 1,
+    marginBottom: 12,
   },
   typeTitle: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 18,
+    fontWeight: '600' as const,
     color: '#111827',
     marginBottom: 4,
   },
   typeDescription: {
     fontSize: 14,
     color: '#4B5563',
+    textAlign: 'center',
     lineHeight: 20,
   },
   previewContainer: {
