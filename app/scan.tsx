@@ -210,8 +210,8 @@ export default function ScanScreen() {
             colors={[moduleConfig.color, moduleConfig.color]}
             style={styles.typeGradient}
           >
-            <View style={[styles.typeIcon, { backgroundColor: moduleConfig.accentColor }]}>
-              <CategoryIcon scanType={scanType} color={Colors.textInverse} size={28} />
+            <View style={styles.typeIcon}>
+              <CategoryIcon scanType={scanType} color={moduleConfig.accentColor} size={24} />
             </View>
             <Text style={styles.typeTitle}>
               {moduleConfig.name}
@@ -428,10 +428,17 @@ const styles = StyleSheet.create({
   typeIcon: {
     width: 56,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    // Subtle icon shadow matching Home
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   typeTitle: {
     fontSize: 18,
