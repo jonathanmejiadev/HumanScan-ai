@@ -301,46 +301,40 @@ export default function ScanScreen() {
         ) : (
           <View style={styles.captureSection}>
             <TouchableOpacity
-              style={styles.captureCard}
+              style={styles.captureButton}
               onPress={() => pickImage(true)}
               activeOpacity={0.8}
             >
-              <View style={styles.captureIconBase}>
-                <Camera color={Colors.primary} size={28} />
+              <View style={styles.captureIconContainer}>
+                <Camera color={Colors.primary} size={32} />
               </View>
-              <View style={styles.captureText}>
-                <Text style={styles.captureCardTitle}>Uso de Cámara</Text>
-                <Text style={styles.captureCardSubtitle}>Tomar foto ahora</Text>
-              </View>
+              <Text style={styles.captureButtonTitle}>Usar Cámara</Text>
+              <Text style={styles.captureButtonSubtitle}>Tomar foto ahora</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.captureCard}
+              style={styles.captureButton}
               onPress={() => pickImage(false)}
               activeOpacity={0.8}
             >
-              <View style={styles.captureIconBase}>
-                <ImageIcon color={Colors.primary} size={28} />
+              <View style={styles.captureIconContainer}>
+                <ImageIcon color={Colors.primary} size={32} />
               </View>
-              <View style={styles.captureText}>
-                <Text style={styles.captureCardTitle}>Galería</Text>
-                <Text style={styles.captureCardSubtitle}>Seleccionar imagen</Text>
-              </View>
+              <Text style={styles.captureButtonTitle}>Galería</Text>
+              <Text style={styles.captureButtonSubtitle}>Seleccionar imagen</Text>
             </TouchableOpacity>
 
             {scanType === 'lab_results' && (
               <TouchableOpacity
-                style={styles.captureCard}
+                style={styles.captureButton}
                 onPress={pickDocument}
                 activeOpacity={0.8}
               >
-                <View style={styles.captureIconBase}>
-                  <FileText color={Colors.primary} size={28} />
+                <View style={styles.captureIconContainer}>
+                  <FileText color={Colors.primary} size={32} />
                 </View>
-                <View style={styles.captureText}>
-                  <Text style={styles.captureCardTitle}>Subir PDF</Text>
-                  <Text style={styles.captureCardSubtitle}>Seleccionar archivo</Text>
-                </View>
+                <Text style={styles.captureButtonTitle}>Subir PDF</Text>
+                <Text style={styles.captureButtonSubtitle}>Seleccionar archivo</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -480,44 +474,44 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   captureSection: {
-    gap: 12,
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 24,
   },
-  captureCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  captureButton: {
+    flex: 1,
     backgroundColor: Colors.surface,
     borderRadius: 20,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
+    padding: 24,
+    alignItems: 'center',
     shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
+    shadowOpacity: 1,
+    shadowRadius: 8,
     elevation: 2,
-    gap: 16,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
-  captureIconBase: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+  captureIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: '#EEF2FF', // Indigo PrimaryLight
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
   },
-  captureText: {
-    flex: 1,
-  },
-  captureCardTitle: {
+  captureButtonTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 2,
+    marginBottom: 4,
+    textAlign: 'center',
   },
-  captureCardSubtitle: {
-    fontSize: 13,
+  captureButtonSubtitle: {
+    fontSize: 12,
     color: '#6B7280',
+    textAlign: 'center',
   },
   tipsSection: {
     backgroundColor: Colors.surface,
