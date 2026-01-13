@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
     },
     decorativeIcon: {
         position: 'absolute',
-        right: 20,
-        top: 25,
+        right: 0,
+        top: 0,
         zIndex: 1,
-        transform: [{ rotate: '15deg' }],
+        transform: [{ rotate: '15deg' }, { translateX: 5 }, { translateY: -5 }],
     },
 });
